@@ -84,6 +84,30 @@ class ProductListResponse(BaseModel):
     page_size: int
 
 
+class UserUpdateRequest(BaseModel):
+    """Request to update a user."""
+
+    full_name: str | None = None
+    role: str | None = None
+    email_verified: bool | None = None
+
+
+class ProductUpdateRequest(BaseModel):
+    """Request to update a product."""
+
+    name: str | None = None
+    category: str | None = None
+    price: float | None = None
+    quantity: int | None = None
+    status: str | None = None
+
+
+class MessageResponse(BaseModel):
+    """Simple message response."""
+
+    message: str
+
+
 def require_admin(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
     """Dependency to require admin role."""
     if current_user.role != "admin":
@@ -318,3 +342,316 @@ def get_products(
         page=page,
         page_size=page_size,
     )
+
+
+# ============================================================================
+# User CRUD Operations
+# ============================================================================
+
+
+@router.get("/users/{user_id}", response_model=UserListItem)
+def get_user(
+    user_id: str,
+    current_user: UserInDB = Depends(require_admin),
+) -> UserListItem:
+    """Get a single user by ID."""
+    db = get_supabase_client()
+
+    result = (
+        db.table("users")
+        .select("id, email, full_name, role, email_verified, created_at")
+        .eq("id", user_id)
+        .single()
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    u = result.data
+    return UserListItem(
+        id=str(u["id"]),
+        email=u["email"],
+        full_name=u["full_name"] or "",
+        role=u["role"] or "consumer",
+        email_verified=u["email_verified"] or False,
+        created_at=str(u["created_at"]),
+    )
+
+
+@router.put("/users/{user_id}", response_model=UserListItem)
+def update_user(
+    user_id: str,
+    request: UserUpdateRequest,
+    current_user: UserInDB = Depends(require_admin),
+) -> UserListItem:
+    """Update a user's details."""
+    db = get_supabase_client()
+
+    # Prevent admin from demoting themselves
+    if str(current_user.id) == user_id and request.role and request.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot change your own admin role",
+        )
+
+    # Build update data
+    update_data = {}
+    if request.full_name is not None:
+        update_data["full_name"] = request.full_name
+    if request.role is not None:
+        if request.role not in ["consumer", "farmer", "admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid role. Must be consumer, farmer, or admin",
+            )
+        update_data["role"] = request.role
+    if request.email_verified is not None:
+        update_data["email_verified"] = request.email_verified
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No fields to update",
+        )
+
+    result = (
+        db.table("users")
+        .update(update_data)
+        .eq("id", user_id)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Fetch updated user
+    updated = (
+        db.table("users")
+        .select("id, email, full_name, role, email_verified, created_at")
+        .eq("id", user_id)
+        .single()
+        .execute()
+    )
+
+    u = updated.data
+    return UserListItem(
+        id=str(u["id"]),
+        email=u["email"],
+        full_name=u["full_name"] or "",
+        role=u["role"] or "consumer",
+        email_verified=u["email_verified"] or False,
+        created_at=str(u["created_at"]),
+    )
+
+
+@router.delete("/users/{user_id}", response_model=MessageResponse)
+def delete_user(
+    user_id: str,
+    current_user: UserInDB = Depends(require_admin),
+) -> MessageResponse:
+    """Delete a user."""
+    db = get_supabase_client()
+
+    # Prevent admin from deleting themselves
+    if str(current_user.id) == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account",
+        )
+
+    # Check if user exists
+    check = db.table("users").select("id, role").eq("id", user_id).single().execute()
+    if not check.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Delete associated data first (products if farmer)
+    if check.data.get("role") == "farmer":
+        db.table("products").delete().eq("farmer_id", user_id).execute()
+        # Try to delete farmer profile
+        try:
+            db.table("farmers").delete().eq("user_id", user_id).execute()
+        except Exception:
+            pass
+
+    # Delete user
+    db.table("users").delete().eq("id", user_id).execute()
+
+    return MessageResponse(message="User deleted successfully")
+
+
+# ============================================================================
+# Product CRUD Operations
+# ============================================================================
+
+
+@router.get("/products/{product_id}", response_model=ProductListItem)
+def get_product(
+    product_id: str,
+    current_user: UserInDB = Depends(require_admin),
+) -> ProductListItem:
+    """Get a single product by ID."""
+    db = get_supabase_client()
+
+    result = (
+        db.table("products")
+        .select("id, name, category, price, quantity, status, farmer_id, created_at")
+        .eq("id", product_id)
+        .single()
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    p = result.data
+    farmer_name = None
+    try:
+        farmer = (
+            db.table("users")
+            .select("full_name")
+            .eq("id", p["farmer_id"])
+            .single()
+            .execute()
+        )
+        if farmer.data:
+            farmer_name = farmer.data.get("full_name")
+    except Exception:
+        pass
+
+    return ProductListItem(
+        id=str(p["id"]),
+        name=p["name"],
+        category=p["category"],
+        price=float(p["price"]),
+        quantity=p["quantity"],
+        status=p["status"],
+        farmer_name=farmer_name,
+        created_at=str(p["created_at"]),
+    )
+
+
+@router.put("/products/{product_id}", response_model=ProductListItem)
+def update_product(
+    product_id: str,
+    request: ProductUpdateRequest,
+    current_user: UserInDB = Depends(require_admin),
+) -> ProductListItem:
+    """Update a product's details."""
+    db = get_supabase_client()
+
+    # Build update data
+    update_data = {}
+    if request.name is not None:
+        update_data["name"] = request.name
+    if request.category is not None:
+        update_data["category"] = request.category
+    if request.price is not None:
+        if request.price < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Price cannot be negative",
+            )
+        update_data["price"] = request.price
+    if request.quantity is not None:
+        if request.quantity < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Quantity cannot be negative",
+            )
+        update_data["quantity"] = request.quantity
+    if request.status is not None:
+        if request.status not in ["active", "inactive", "archived"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid status. Must be active, inactive, or archived",
+            )
+        update_data["status"] = request.status
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No fields to update",
+        )
+
+    result = (
+        db.table("products")
+        .update(update_data)
+        .eq("id", product_id)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    # Fetch updated product
+    updated = (
+        db.table("products")
+        .select("id, name, category, price, quantity, status, farmer_id, created_at")
+        .eq("id", product_id)
+        .single()
+        .execute()
+    )
+
+    p = updated.data
+    farmer_name = None
+    try:
+        farmer = (
+            db.table("users")
+            .select("full_name")
+            .eq("id", p["farmer_id"])
+            .single()
+            .execute()
+        )
+        if farmer.data:
+            farmer_name = farmer.data.get("full_name")
+    except Exception:
+        pass
+
+    return ProductListItem(
+        id=str(p["id"]),
+        name=p["name"],
+        category=p["category"],
+        price=float(p["price"]),
+        quantity=p["quantity"],
+        status=p["status"],
+        farmer_name=farmer_name,
+        created_at=str(p["created_at"]),
+    )
+
+
+@router.delete("/products/{product_id}", response_model=MessageResponse)
+def delete_product(
+    product_id: str,
+    current_user: UserInDB = Depends(require_admin),
+) -> MessageResponse:
+    """Delete a product."""
+    db = get_supabase_client()
+
+    # Check if product exists
+    check = db.table("products").select("id").eq("id", product_id).single().execute()
+    if not check.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    # Delete product
+    db.table("products").delete().eq("id", product_id).execute()
+
+    return MessageResponse(message="Product deleted successfully")

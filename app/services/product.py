@@ -5,10 +5,14 @@ from decimal import Decimal
 from uuid import UUID
 
 from app.models.product import (
+    ProductCategory,
+    ProductCreate,
     ProductInDB,
     ProductResponse,
     ProductStatus,
+    ProductUnit,
     ProductUpdate,
+    Seasonality,
 )
 from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
@@ -89,9 +93,11 @@ class ProductService:
             has_bulk_pricing = len(bulk_pricing) > 0
 
         # Fetch farmer name if farmer repository is available
+        # Note: products.farmer_id references users.id, not farmers.id
+        # So we look up by user_id
         farmer_name = None
         if self.farmer_repo and product.farmer_id:
-            farmer = self.farmer_repo.get_by_id(product.farmer_id)
+            farmer = self.farmer_repo.get_by_user_id(product.farmer_id)
             if farmer:
                 farmer_name = farmer.farm_name
 
@@ -122,6 +128,33 @@ class ProductService:
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
+
+    def create_product(
+        self, farmer_id: UUID, product_data: ProductCreate
+    ) -> ProductResult:
+        """Create a new product for a farmer.
+
+        Args:
+            farmer_id: Farmer's UUID.
+            product_data: ProductCreate with product details.
+
+        Returns:
+            ProductResult with created product or error.
+        """
+        try:
+            product = self.product_repo.create(
+                farmer_id=farmer_id,
+                name=product_data.name,
+                category=product_data.category,
+                description=product_data.description,
+                price=product_data.price,
+                unit=product_data.unit,
+                quantity=product_data.quantity,
+                seasonality=product_data.seasonality,
+            )
+            return ProductResult(success=True, product=self._to_response(product))
+        except Exception as e:
+            return ProductResult(success=False, error=str(e))
 
     def get_product(self, farmer_id: UUID, product_id: UUID) -> ProductResult:
         """Get a product by ID for a specific farmer.

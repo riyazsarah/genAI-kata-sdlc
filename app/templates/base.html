@@ -69,7 +69,21 @@
                         </svg>
                         <span class="nav-cart-count" id="nav-cart-count">0</span>
                     </a>
-                    <a href="/dashboard" class="btn btn-ghost">Dashboard</a>
+                    <!-- Role-based dashboard links -->
+                    <a href="/dashboard" class="btn btn-ghost" id="nav-consumer-dashboard">Dashboard</a>
+                    <a href="/farmer/dashboard" class="btn btn-ghost nav-role-link hidden" id="nav-farmer-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        Farmer Dashboard
+                    </a>
+                    <a href="/admin/dashboard" class="btn btn-admin nav-role-link hidden" id="nav-admin-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Admin Panel
+                    </a>
                     <div class="nav-user-avatar" id="nav-avatar"></div>
                     <button class="btn btn-ghost btn-sm" id="nav-logout">Log Out</button>
                 </div>
@@ -97,10 +111,15 @@
             var navAvatar = document.getElementById('nav-avatar');
             var navLogout = document.getElementById('nav-logout');
             var navCartCount = document.getElementById('nav-cart-count');
+            var navConsumerDashboard = document.getElementById('nav-consumer-dashboard');
+            var navFarmerDashboard = document.getElementById('nav-farmer-dashboard');
+            var navAdminDashboard = document.getElementById('nav-admin-dashboard');
+            var navCartLink = document.getElementById('nav-cart-link');
 
             if (accessToken && userStr) {
                 try {
                     var user = JSON.parse(userStr);
+                    var userRole = user.role || 'consumer';
 
                     // Hide login/register, show user nav
                     if (loginLink) loginLink.classList.add('hidden');
@@ -119,8 +138,28 @@
                         navAvatar.textContent = initials;
                     }
 
-                    // Load cart count
-                    if (navCartCount) {
+                    // Show/hide role-based navigation
+                    if (userRole === 'farmer') {
+                        // Farmer: Show farmer dashboard, hide consumer dashboard
+                        if (navConsumerDashboard) navConsumerDashboard.classList.add('hidden');
+                        if (navFarmerDashboard) navFarmerDashboard.classList.remove('hidden');
+                        if (navAdminDashboard) navAdminDashboard.classList.add('hidden');
+                    } else if (userRole === 'admin') {
+                        // Admin: Show admin panel, hide consumer dashboard
+                        if (navConsumerDashboard) navConsumerDashboard.classList.add('hidden');
+                        if (navFarmerDashboard) navFarmerDashboard.classList.add('hidden');
+                        if (navAdminDashboard) navAdminDashboard.classList.remove('hidden');
+                        // Hide cart for admin
+                        if (navCartLink) navCartLink.classList.add('hidden');
+                    } else {
+                        // Consumer: Show consumer dashboard (default)
+                        if (navConsumerDashboard) navConsumerDashboard.classList.remove('hidden');
+                        if (navFarmerDashboard) navFarmerDashboard.classList.add('hidden');
+                        if (navAdminDashboard) navAdminDashboard.classList.add('hidden');
+                    }
+
+                    // Load cart count (only for consumers and farmers)
+                    if (navCartCount && userRole !== 'admin') {
                         loadCartCount(accessToken, navCartCount);
                     }
 

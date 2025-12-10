@@ -9,6 +9,7 @@ from app.core.dependencies import get_current_active_user
 from app.db.supabase import get_supabase_client
 from app.models.product import (
     InventoryUpdate,
+    ProductCreate,
     ProductListResponse,
     ProductResponse,
     ProductStatus,
@@ -55,11 +56,69 @@ class LowStockListResponse(BaseModel):
     total: int
 
 
+class ProductCreateResponse(BaseModel):
+    """Response model for successful product creation."""
+
+    message: str
+    product: ProductResponse
+
+
 def get_product_service() -> ProductService:
     """Dependency to get the product service."""
     db_client = get_supabase_client()
     product_repo = ProductRepository(db_client)
     return ProductService(product_repo)
+
+
+# =============================================================================
+# US-006: Add Product Listing
+# =============================================================================
+
+
+@router.post(
+    "",
+    response_model=ProductCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid input"},
+        401: {"model": ErrorResponse, "description": "Not authenticated"},
+    },
+    summary="Create new product",
+    description="Create a new product listing for the authenticated farmer.",
+)
+async def create_product(
+    product_data: ProductCreate,
+    current_user: UserInDB = Depends(get_current_active_user),
+    product_service: ProductService = Depends(get_product_service),
+) -> ProductCreateResponse:
+    """Create a new product for the authenticated farmer.
+
+    Args:
+        product_data: ProductCreate with product details.
+        current_user: Currently authenticated user.
+        product_service: Injected product service.
+
+    Returns:
+        ProductCreateResponse with success message and created product.
+
+    Raises:
+        HTTPException: 400 for validation errors.
+    """
+    result = product_service.create_product(
+        farmer_id=current_user.id,
+        product_data=product_data,
+    )
+
+    if not result.success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=result.error,
+        )
+
+    return ProductCreateResponse(
+        message="Product created successfully",
+        product=result.product,  # type: ignore
+    )
 
 
 @router.get(

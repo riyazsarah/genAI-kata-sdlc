@@ -8,10 +8,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.core.config import get_settings
-from app.core.dependencies import get_current_active_user
+from app.core.dependencies import require_auth_cookie
 from app.db.supabase import get_supabase_client
 from app.models.product import (
     ProductCategory,
+    ProductCreate,
     ProductStatus,
     ProductUnit,
     ProductUpdate,
@@ -68,7 +69,7 @@ def get_product_service() -> ProductService:
 @router.get("/products", response_class=HTMLResponse)
 async def farmer_products_page(
     request: Request,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
 ) -> HTMLResponse:
     """Render the farmer's products list page."""
     return templates.TemplateResponse(
@@ -82,12 +83,77 @@ async def farmer_products_page(
     )
 
 
+@router.get("/products/new", response_class=HTMLResponse)
+async def farmer_product_new_page(
+    request: Request,
+    current_user: UserInDB = Depends(require_auth_cookie),
+) -> HTMLResponse:
+    """Render the new product creation page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="farmer/product_new.html",
+        context={
+            "app_name": settings.app_name,
+            "version": settings.app_version,
+            "user": current_user,
+            "categories": [c.value for c in ProductCategory],
+            "units": [u.value for u in ProductUnit],
+            "seasons": [s.value for s in Seasonality],
+        },
+    )
+
+
+@router.post("/products", response_class=HTMLResponse)
+async def farmer_product_create(
+    request: Request,
+    name: str = Form(...),
+    category: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    unit: str = Form(...),
+    quantity: int = Form(...),
+    seasonality: list[str] = Form(default=[]),
+    current_user: UserInDB = Depends(require_auth_cookie),
+    product_service: ProductService = Depends(get_product_service),
+) -> HTMLResponse:
+    """Handle product creation via HTMX form submission."""
+    # Convert form data to ProductCreate
+    product_data = ProductCreate(
+        name=name,
+        category=ProductCategory(category),
+        description=description,
+        price=Decimal(str(price)),
+        unit=ProductUnit(unit),
+        quantity=quantity,
+        seasonality=[Seasonality(s) for s in seasonality] if seasonality else [Seasonality.YEAR_ROUND],
+    )
+
+    result = product_service.create_product(
+        farmer_id=current_user.id,
+        product_data=product_data,
+    )
+
+    if not result.success:
+        return HTMLResponse(
+            content=f'<div id="form-result" class="alert alert-error">{result.error}</div>',
+            status_code=400,
+        )
+
+    # Return success message with redirect script
+    return HTMLResponse(
+        content=f'''<div id="form-result" class="alert alert-success">
+            Product created successfully! Redirecting...
+            <script>setTimeout(function() {{ window.location.href = "/farmer/products"; }}, 1500);</script>
+        </div>''',
+    )
+
+
 @router.get("/products/list", response_class=HTMLResponse)
 async def farmer_products_list(
     request: Request,
     page: int = Query(default=1, ge=1),
     status: str | None = Query(default=None),
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Render the products list partial for HTMX."""
@@ -118,7 +184,7 @@ async def farmer_products_list(
 async def farmer_product_edit_page(
     request: Request,
     product_id: UUID,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Render the product edit page."""
@@ -170,7 +236,7 @@ async def farmer_product_update(
     status: str = Form(...),
     version: int = Form(...),
     seasonality: list[str] = Form(default=[]),
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Handle product update via HTMX form submission."""
@@ -216,7 +282,7 @@ async def farmer_product_remove_image(
     request: Request,
     product_id: UUID,
     image_url: str = Query(...),
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Handle image removal via HTMX."""
@@ -244,7 +310,7 @@ async def farmer_product_remove_image(
 @router.get("/products/low-stock", response_class=HTMLResponse)
 async def farmer_low_stock_page(
     request: Request,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
 ) -> HTMLResponse:
     """Render the low-stock products page."""
     return templates.TemplateResponse(
@@ -261,7 +327,7 @@ async def farmer_low_stock_page(
 @router.get("/products/low-stock/list", response_class=HTMLResponse)
 async def farmer_low_stock_list(
     request: Request,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Render the low-stock products list partial for HTMX."""
@@ -285,7 +351,7 @@ async def farmer_low_stock_list(
 async def farmer_archive_product(
     request: Request,
     product_id: UUID,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Archive a product and return updated product card HTML."""
@@ -311,7 +377,7 @@ async def farmer_archive_product(
 async def farmer_reactivate_product(
     request: Request,
     product_id: UUID,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Reactivate a product and return updated product card HTML."""
@@ -337,7 +403,7 @@ async def farmer_reactivate_product(
 async def farmer_delete_product(
     request: Request,
     product_id: UUID,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Delete a product and return empty response to remove from DOM."""
@@ -360,7 +426,7 @@ async def farmer_delete_product(
 async def farmer_update_inventory(
     request: Request,
     product_id: UUID,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Update product inventory and return updated product card HTML."""
@@ -393,7 +459,7 @@ async def farmer_set_availability(
     product_id: UUID,
     in_stock: bool = Query(...),
     quantity: int = Query(default=1, ge=1),
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: UserInDB = Depends(require_auth_cookie),
     product_service: ProductService = Depends(get_product_service),
 ) -> HTMLResponse:
     """Set product availability and return updated card HTML."""

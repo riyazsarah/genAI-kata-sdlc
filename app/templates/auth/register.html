@@ -4,19 +4,91 @@
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-card">
-        <h1>Create Account</h1>
-        <p class="auth-subtitle">Join the Farm-to-Table Marketplace</p>
+    <!-- Role Selection Screen -->
+    <div class="auth-card role-selection-card" id="role-selection">
+        <h1>Join {{ app_name }}</h1>
+        <p class="auth-subtitle">How would you like to use our platform?</p>
 
-        <div id="error-message" class="alert alert-error" style="display: none;"></div>
-        <div id="success-message" class="alert alert-success" style="display: none;"></div>
+        <div class="role-options">
+            <div class="role-card" id="consumer-role" onclick="selectRole('consumer')">
+                <div class="role-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                </div>
+                <h3>Consumer</h3>
+                <p>I want to buy fresh products from local farmers</p>
+                <ul class="role-benefits">
+                    <li>Browse fresh farm products</li>
+                    <li>Order directly from farmers</li>
+                    <li>Support local agriculture</li>
+                </ul>
+                <div class="role-select-indicator">
+                    <span class="checkmark"></span>
+                </div>
+            </div>
 
-        <form id="register-form" class="auth-form">
+            <div class="role-card" id="farmer-role" onclick="selectRole('farmer')">
+                <div class="role-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <h3>Farmer</h3>
+                <p>I want to sell my farm products to consumers</p>
+                <ul class="role-benefits">
+                    <li>List your farm products</li>
+                    <li>Reach local customers directly</li>
+                    <li>Manage orders & inventory</li>
+                </ul>
+                <div class="role-select-indicator">
+                    <span class="checkmark"></span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" id="continue-btn" disabled onclick="continueWithRole()">
+            Continue
+        </button>
+
+        <p class="auth-footer">
+            Already have an account? <a href="/login">Log in</a>
+        </p>
+    </div>
+
+    <!-- Consumer Registration Form -->
+    <div class="auth-card" id="consumer-form" style="display: none;">
+        <button class="back-btn" onclick="goBackToRoleSelection()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </button>
+
+        <div class="form-header">
+            <div class="form-header-icon consumer-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </div>
+            <h1>Create Consumer Account</h1>
+            <p class="auth-subtitle">Start shopping for fresh farm products</p>
+        </div>
+
+        <div id="consumer-error-message" class="alert alert-error" style="display: none;"></div>
+        <div id="consumer-success-message" class="alert alert-success" style="display: none;"></div>
+
+        <form id="consumer-register-form" class="auth-form">
             <div class="form-group">
-                <label for="full_name">Full Name</label>
+                <label for="consumer_full_name">Full Name</label>
                 <input
                     type="text"
-                    id="full_name"
+                    id="consumer_full_name"
                     name="full_name"
                     required
                     minlength="2"
@@ -26,54 +98,201 @@
             </div>
 
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="consumer_email">Email Address</label>
                 <input
                     type="email"
-                    id="email"
+                    id="consumer_email"
                     name="email"
                     required
                     placeholder="Enter your email"
                 >
-                <span class="field-error" id="email-error"></span>
+                <span class="field-error" id="consumer-email-error"></span>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="consumer_password">Password</label>
                 <input
                     type="password"
-                    id="password"
+                    id="consumer_password"
                     name="password"
                     required
                     minlength="8"
                     placeholder="Create a password"
                 >
-                <span class="field-error" id="password-error"></span>
+                <span class="field-error" id="consumer-password-error"></span>
                 <div class="password-requirements">
                     <p>Password must contain:</p>
                     <ul>
-                        <li id="req-length">At least 8 characters</li>
-                        <li id="req-upper">One uppercase letter</li>
-                        <li id="req-lower">One lowercase letter</li>
-                        <li id="req-digit">One digit</li>
-                        <li id="req-special">One special character (!@#$%^&*)</li>
+                        <li id="consumer-req-length">At least 8 characters</li>
+                        <li id="consumer-req-upper">One uppercase letter</li>
+                        <li id="consumer-req-lower">One lowercase letter</li>
+                        <li id="consumer-req-digit">One digit</li>
+                        <li id="consumer-req-special">One special character (!@#$%^&*)</li>
                     </ul>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="phone">Phone Number (Optional)</label>
+                <label for="consumer_phone">Phone Number (Optional)</label>
                 <input
                     type="tel"
-                    id="phone"
+                    id="consumer_phone"
                     name="phone"
                     maxlength="20"
-                    placeholder="+1234567890"
+                    placeholder="+91 9876543210"
                 >
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">
-                <span id="btn-text">Sign Up</span>
-                <span id="btn-loading" style="display: none;">Creating account...</span>
+                <span id="consumer-btn-text">Create Account</span>
+                <span id="consumer-btn-loading" style="display: none;">Creating account...</span>
+            </button>
+        </form>
+
+        <p class="auth-footer">
+            Already have an account? <a href="/login">Log in</a>
+        </p>
+    </div>
+
+    <!-- Farmer Registration Form -->
+    <div class="auth-card auth-card-wide" id="farmer-form" style="display: none;">
+        <button class="back-btn" onclick="goBackToRoleSelection()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </button>
+
+        <div class="form-header">
+            <div class="form-header-icon farmer-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <h1>Create Farmer Account</h1>
+            <p class="auth-subtitle">Start selling your farm products</p>
+        </div>
+
+        <div id="farmer-error-message" class="alert alert-error" style="display: none;"></div>
+        <div id="farmer-success-message" class="alert alert-success" style="display: none;">
+            <strong>Registration successful!</strong><br>
+            <span id="farmer-success-text"></span><br>
+            <a href="/login" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">Go to Login</a>
+        </div>
+
+        <form id="farmer-register-form" class="auth-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Personal Information</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="farmer_full_name">Full Name *</label>
+                        <input
+                            type="text"
+                            id="farmer_full_name"
+                            name="full_name"
+                            required
+                            minlength="2"
+                            maxlength="255"
+                            placeholder="Enter your full name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="farmer_email">Email Address *</label>
+                        <input
+                            type="email"
+                            id="farmer_email"
+                            name="email"
+                            required
+                            placeholder="Enter your email"
+                        >
+                        <span class="field-error" id="farmer-email-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="farmer_phone">Phone Number *</label>
+                        <input
+                            type="tel"
+                            id="farmer_phone"
+                            name="phone"
+                            required
+                            maxlength="20"
+                            placeholder="+91 9876543210"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="farmer_date_of_birth">Date of Birth *</label>
+                        <input
+                            type="date"
+                            id="farmer_date_of_birth"
+                            name="date_of_birth"
+                            required
+                        >
+                        <span class="field-hint">Must be 18 years or older</span>
+                        <span class="field-error" id="farmer-dob-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmer_password">Password *</label>
+                    <input
+                        type="password"
+                        id="farmer_password"
+                        name="password"
+                        required
+                        minlength="8"
+                        placeholder="Create a password"
+                    >
+                    <span class="field-error" id="farmer-password-error"></span>
+                    <div class="password-requirements">
+                        <p>Password must contain:</p>
+                        <ul>
+                            <li id="farmer-req-length">At least 8 characters</li>
+                            <li id="farmer-req-upper">One uppercase letter</li>
+                            <li id="farmer-req-lower">One lowercase letter</li>
+                            <li id="farmer-req-digit">One digit</li>
+                            <li id="farmer-req-special">One special character (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Farm Information</h3>
+
+                <div class="form-group">
+                    <label for="farmer_farm_name">Farm Name *</label>
+                    <input
+                        type="text"
+                        id="farmer_farm_name"
+                        name="farm_name"
+                        required
+                        minlength="2"
+                        maxlength="200"
+                        placeholder="Enter your farm name"
+                    >
+                    <span class="field-hint">This will be displayed to customers</span>
+                </div>
+            </div>
+
+            <div class="form-agreement">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="farmer_terms" required>
+                    <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <span id="farmer-btn-text">Create Farmer Account</span>
+                <span id="farmer-btn-loading" style="display: none;">
+                    <span class="loading-spinner"></span>
+                    Creating account...
+                </span>
             </button>
         </form>
 
@@ -82,6 +301,261 @@
         </p>
     </div>
 </div>
+
+<style>
+    /* Role Selection Styles */
+    .role-selection-card {
+        max-width: 700px;
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 600px) {
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .role-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        background: #fff;
+    }
+
+    .role-card:hover {
+        border-color: #22c55e;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    }
+
+    .role-card.selected {
+        border-color: #22c55e;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.1) 100%);
+    }
+
+    .role-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: #22c55e;
+    }
+
+    .role-card h3 {
+        font-size: 1.25rem;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .role-card > p {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0 0 1rem 0;
+    }
+
+    .role-benefits {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .role-benefits li {
+        font-size: 0.85rem;
+        color: #64748b;
+        padding: 0.35rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .role-benefits li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #22c55e;
+        font-weight: bold;
+    }
+
+    .role-select-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 24px;
+        height: 24px;
+        border: 2px solid #e2e8f0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .role-card.selected .role-select-indicator {
+        background: #22c55e;
+        border-color: #22c55e;
+    }
+
+    .role-select-indicator .checkmark {
+        display: none;
+    }
+
+    .role-card.selected .role-select-indicator .checkmark {
+        display: block;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .role-card.selected .role-select-indicator .checkmark::before {
+        content: "✓";
+    }
+
+    #continue-btn {
+        margin-top: 1rem;
+    }
+
+    #continue-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+        transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+        color: #22c55e;
+    }
+
+    /* Form Header */
+    .form-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-header-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .form-header-icon.consumer-icon {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #3b82f6;
+    }
+
+    .form-header-icon.farmer-icon {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        color: #22c55e;
+    }
+
+    .form-header h1 {
+        margin: 0 0 0.5rem 0;
+    }
+
+    /* Form sections for farmer */
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        color: #1e293b;
+        margin: 0 0 1rem 0;
+        font-weight: 600;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .field-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-agreement {
+        margin: 1.5rem 0;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #64748b;
+        cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        margin-top: 0.2rem;
+    }
+
+    .checkbox-label a {
+        color: #22c55e;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .auth-card-wide {
+        max-width: 600px;
+    }
+</style>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -97,26 +571,62 @@
         }
     })();
 
-    const form = document.getElementById('register-form');
-    const errorDiv = document.getElementById('error-message');
-    const successDiv = document.getElementById('success-message');
-    const btnText = document.getElementById('btn-text');
-    const btnLoading = document.getElementById('btn-loading');
-    const passwordInput = document.getElementById('password');
+    let selectedRole = null;
 
-    // Password validation requirements
-    const requirements = {
-        length: { regex: /.{8,}/, element: document.getElementById('req-length') },
-        upper: { regex: /[A-Z]/, element: document.getElementById('req-upper') },
-        lower: { regex: /[a-z]/, element: document.getElementById('req-lower') },
-        digit: { regex: /[0-9]/, element: document.getElementById('req-digit') },
-        special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('req-special') }
+    // Role selection
+    function selectRole(role) {
+        selectedRole = role;
+
+        // Update UI
+        document.getElementById('consumer-role').classList.remove('selected');
+        document.getElementById('farmer-role').classList.remove('selected');
+        document.getElementById(role + '-role').classList.add('selected');
+
+        // Enable continue button
+        document.getElementById('continue-btn').disabled = false;
+    }
+
+    function continueWithRole() {
+        if (!selectedRole) return;
+
+        document.getElementById('role-selection').style.display = 'none';
+
+        if (selectedRole === 'consumer') {
+            document.getElementById('consumer-form').style.display = 'block';
+        } else {
+            document.getElementById('farmer-form').style.display = 'block';
+        }
+    }
+
+    function goBackToRoleSelection() {
+        document.getElementById('consumer-form').style.display = 'none';
+        document.getElementById('farmer-form').style.display = 'none';
+        document.getElementById('role-selection').style.display = 'block';
+    }
+
+    // ========================================================================
+    // Consumer Form Logic
+    // ========================================================================
+    const consumerForm = document.getElementById('consumer-register-form');
+    const consumerErrorDiv = document.getElementById('consumer-error-message');
+    const consumerSuccessDiv = document.getElementById('consumer-success-message');
+    const consumerBtnText = document.getElementById('consumer-btn-text');
+    const consumerBtnLoading = document.getElementById('consumer-btn-loading');
+    const consumerPasswordInput = document.getElementById('consumer_password');
+
+    // Consumer password validation requirements
+    const consumerRequirements = {
+        length: { regex: /.{8,}/, element: document.getElementById('consumer-req-length') },
+        upper: { regex: /[A-Z]/, element: document.getElementById('consumer-req-upper') },
+        lower: { regex: /[a-z]/, element: document.getElementById('consumer-req-lower') },
+        digit: { regex: /[0-9]/, element: document.getElementById('consumer-req-digit') },
+        special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('consumer-req-special') }
     };
 
-    // Real-time password validation
-    passwordInput.addEventListener('input', function() {
+    // Real-time password validation for consumer
+    consumerPasswordInput.addEventListener('input', function() {
         const password = this.value;
-        for (const [key, req] of Object.entries(requirements)) {
+        for (const [key, req] of Object.entries(consumerRequirements)) {
             if (req.regex.test(password)) {
                 req.element.classList.add('valid');
                 req.element.classList.remove('invalid');
@@ -127,40 +637,40 @@
         }
     });
 
-    // Email validation
-    const emailInput = document.getElementById('email');
-    const emailError = document.getElementById('email-error');
+    // Consumer email validation
+    const consumerEmailInput = document.getElementById('consumer_email');
+    const consumerEmailError = document.getElementById('consumer-email-error');
 
-    emailInput.addEventListener('blur', function() {
+    consumerEmailInput.addEventListener('blur', function() {
         const email = this.value;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (email && !emailRegex.test(email)) {
-            emailError.textContent = 'Please enter a valid email address';
+            consumerEmailError.textContent = 'Please enter a valid email address';
             this.classList.add('input-error');
         } else {
-            emailError.textContent = '';
+            consumerEmailError.textContent = '';
             this.classList.remove('input-error');
         }
     });
 
-    form.addEventListener('submit', async function(e) {
+    consumerForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         // Hide previous messages
-        errorDiv.style.display = 'none';
-        successDiv.style.display = 'none';
+        consumerErrorDiv.style.display = 'none';
+        consumerSuccessDiv.style.display = 'none';
 
         // Show loading state
-        btnText.style.display = 'none';
-        btnLoading.style.display = 'inline';
-        form.querySelector('button').disabled = true;
+        consumerBtnText.style.display = 'none';
+        consumerBtnLoading.style.display = 'inline';
+        consumerForm.querySelector('button').disabled = true;
 
         const formData = {
-            full_name: document.getElementById('full_name').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            phone: document.getElementById('phone').value || null
+            full_name: document.getElementById('consumer_full_name').value,
+            email: document.getElementById('consumer_email').value,
+            password: document.getElementById('consumer_password').value,
+            phone: document.getElementById('consumer_phone').value || null
         };
 
         try {
@@ -175,25 +685,153 @@
             const data = await response.json();
 
             if (response.ok) {
-                successDiv.textContent = data.message;
-                successDiv.style.display = 'block';
-                form.reset();
+                consumerSuccessDiv.textContent = data.message;
+                consumerSuccessDiv.style.display = 'block';
+                consumerForm.reset();
                 // Reset password requirements display
-                for (const req of Object.values(requirements)) {
+                for (const req of Object.values(consumerRequirements)) {
                     req.element.classList.remove('valid', 'invalid');
                 }
             } else {
-                errorDiv.textContent = data.detail || 'Registration failed. Please try again.';
-                errorDiv.style.display = 'block';
+                consumerErrorDiv.textContent = data.detail || 'Registration failed. Please try again.';
+                consumerErrorDiv.style.display = 'block';
             }
         } catch (error) {
-            errorDiv.textContent = 'An error occurred. Please try again later.';
-            errorDiv.style.display = 'block';
+            consumerErrorDiv.textContent = 'An error occurred. Please try again later.';
+            consumerErrorDiv.style.display = 'block';
         } finally {
             // Reset button state
-            btnText.style.display = 'inline';
-            btnLoading.style.display = 'none';
-            form.querySelector('button').disabled = false;
+            consumerBtnText.style.display = 'inline';
+            consumerBtnLoading.style.display = 'none';
+            consumerForm.querySelector('button').disabled = false;
+        }
+    });
+
+    // ========================================================================
+    // Farmer Form Logic
+    // ========================================================================
+    const farmerForm = document.getElementById('farmer-register-form');
+    const farmerErrorDiv = document.getElementById('farmer-error-message');
+    const farmerSuccessDiv = document.getElementById('farmer-success-message');
+    const farmerSuccessText = document.getElementById('farmer-success-text');
+    const farmerBtnText = document.getElementById('farmer-btn-text');
+    const farmerBtnLoading = document.getElementById('farmer-btn-loading');
+    const farmerPasswordInput = document.getElementById('farmer_password');
+    const farmerDobInput = document.getElementById('farmer_date_of_birth');
+
+    // Set max date for DOB (must be 18+)
+    const today = new Date();
+    const minAge = 18;
+    const maxDate = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+    farmerDobInput.max = maxDate.toISOString().split('T')[0];
+
+    // Farmer password validation requirements
+    const farmerRequirements = {
+        length: { regex: /.{8,}/, element: document.getElementById('farmer-req-length') },
+        upper: { regex: /[A-Z]/, element: document.getElementById('farmer-req-upper') },
+        lower: { regex: /[a-z]/, element: document.getElementById('farmer-req-lower') },
+        digit: { regex: /[0-9]/, element: document.getElementById('farmer-req-digit') },
+        special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('farmer-req-special') }
+    };
+
+    // Real-time password validation for farmer
+    farmerPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        for (const [key, req] of Object.entries(farmerRequirements)) {
+            if (req.regex.test(password)) {
+                req.element.classList.add('valid');
+                req.element.classList.remove('invalid');
+            } else {
+                req.element.classList.remove('valid');
+                req.element.classList.add('invalid');
+            }
+        }
+    });
+
+    // Farmer email validation
+    const farmerEmailInput = document.getElementById('farmer_email');
+    const farmerEmailError = document.getElementById('farmer-email-error');
+
+    farmerEmailInput.addEventListener('blur', function() {
+        const email = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (email && !emailRegex.test(email)) {
+            farmerEmailError.textContent = 'Please enter a valid email address';
+            this.classList.add('input-error');
+        } else {
+            farmerEmailError.textContent = '';
+            this.classList.remove('input-error');
+        }
+    });
+
+    // DOB validation
+    const farmerDobError = document.getElementById('farmer-dob-error');
+    farmerDobInput.addEventListener('change', function() {
+        const dob = new Date(this.value);
+        const age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
+
+        if (age < 18) {
+            farmerDobError.textContent = 'You must be at least 18 years old';
+            this.classList.add('input-error');
+        } else {
+            farmerDobError.textContent = '';
+            this.classList.remove('input-error');
+        }
+    });
+
+    farmerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Hide previous messages
+        farmerErrorDiv.style.display = 'none';
+        farmerSuccessDiv.style.display = 'none';
+
+        // Show loading state
+        farmerBtnText.style.display = 'none';
+        farmerBtnLoading.style.display = 'inline-flex';
+        farmerForm.querySelector('button[type="submit"]').disabled = true;
+
+        const formData = {
+            full_name: document.getElementById('farmer_full_name').value,
+            email: document.getElementById('farmer_email').value,
+            password: document.getElementById('farmer_password').value,
+            phone: document.getElementById('farmer_phone').value,
+            date_of_birth: document.getElementById('farmer_date_of_birth').value,
+            farm_name: document.getElementById('farmer_farm_name').value
+        };
+
+        try {
+            const response = await fetch('/api/v1/auth/farmer/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                farmerSuccessText.textContent = data.message;
+                farmerSuccessDiv.style.display = 'block';
+                farmerForm.reset();
+                // Reset password requirements display
+                for (const req of Object.values(farmerRequirements)) {
+                    req.element.classList.remove('valid', 'invalid');
+                }
+            } else {
+                farmerErrorDiv.textContent = data.detail || 'Registration failed. Please try again.';
+                farmerErrorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            farmerErrorDiv.textContent = 'An error occurred. Please try again later.';
+            farmerErrorDiv.style.display = 'block';
+        } finally {
+            // Reset button state
+            farmerBtnText.style.display = 'inline';
+            farmerBtnLoading.style.display = 'none';
+            farmerForm.querySelector('button[type="submit"]').disabled = false;
         }
     });
 </script>

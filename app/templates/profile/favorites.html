@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}My Favorites - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="favorites-container">
+    <div class="page-header">
+        <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+        <h1>My Favorite Products</h1>
+    </div>
+
+    <div id="favorites-list" class="favorites-grid">
+        <div class="loading">Loading favorites...</div>
+    </div>
+</div>
+
+<style>
+    .favorites-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: var(--dark);
+    }
+
+    .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .favorite-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .favorite-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .remove-favorite-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--white);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        z-index: 1;
+    }
+
+    .remove-favorite-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .remove-favorite-btn svg {
+        fill: #dc2626;
+    }
+
+    .favorite-image {
+        aspect-ratio: 4/3;
+        background: var(--background);
+        overflow: hidden;
+    }
+
+    .favorite-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .favorite-image .no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-lighter);
+    }
+
+    .favorite-info {
+        padding: 1rem;
+    }
+
+    .favorite-category {
+        font-size: 0.75rem;
+        color: var(--primary);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .favorite-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .favorite-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .favorite-price .price-unit {
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: var(--text-light);
+    }
+
+    .favorite-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .favorite-actions .btn {
+        flex: 1;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: var(--background);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-lighter);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--dark);
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .loading {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+        window.location.href = '/login';
+    }
+
+    // Load favorites
+    async function loadFavorites() {
+        var listEl = document.getElementById('favorites-list');
+        try {
+            var response = await fetch('/api/v1/wishlist', {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                var data = await response.json();
+                renderFavorites(data.items || []);
+            } else if (response.status === 401) {
+                window.location.href = '/login';
+            } else if (response.status === 404) {
+                // Wishlist endpoint may not exist, show empty
+                renderFavorites([]);
+            } else {
+                listEl.textContent = '';
+                var errorEl = document.createElement('div');
+                errorEl.className = 'loading';
+                errorEl.textContent = 'Failed to load favorites';
+                listEl.appendChild(errorEl);
+            }
+        } catch (e) {
+            console.error('Error:', e);
+            renderFavorites([]);
+        }
+    }
+
+    function renderFavorites(favorites) {
+        var listEl = document.getElementById('favorites-list');
+        listEl.textContent = '';
+
+        if (favorites.length === 0) {
+            var emptyEl = document.createElement('div');
+            emptyEl.className = 'empty-state';
+
+            var iconEl = document.createElement('div');
+            iconEl.className = 'empty-state-icon';
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '48');
+            svg.setAttribute('height', '48');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '1.5');
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z');
+            svg.appendChild(path);
+            iconEl.appendChild(svg);
+            emptyEl.appendChild(iconEl);
+
+            var h3 = document.createElement('h3');
+            h3.textContent = 'No favorites yet';
+            emptyEl.appendChild(h3);
+
+            var p = document.createElement('p');
+            p.textContent = 'Products you favorite will appear here for easy access.';
+            emptyEl.appendChild(p);
+
+            var link = document.createElement('a');
+            link.href = '/shop';
+            link.className = 'btn btn-primary';
+            link.textContent = 'Browse Products';
+            emptyEl.appendChild(link);
+
+            listEl.appendChild(emptyEl);
+            return;
+        }
+
+        favorites.forEach(function(item) {
+            var card = document.createElement('div');
+            card.className = 'favorite-card';
+            card.setAttribute('data-id', item.id);
+
+            // Remove button
+            var removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-favorite-btn';
+            removeBtn.title = 'Remove from favorites';
+            removeBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                removeFavorite(item.product_id, card);
+            };
+            var heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            heartSvg.setAttribute('width', '18');
+            heartSvg.setAttribute('height', '18');
+            heartSvg.setAttribute('viewBox', '0 0 24 24');
+            var heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            heartPath.setAttribute('d', 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z');
+            heartSvg.appendChild(heartPath);
+            removeBtn.appendChild(heartSvg);
+            card.appendChild(removeBtn);
+
+            // Image
+            var imageEl = document.createElement('div');
+            imageEl.className = 'favorite-image';
+            if (item.product && item.product.images && item.product.images.length > 0) {
+                var img = document.createElement('img');
+                img.src = item.product.images[0];
+                img.alt = item.product.name || 'Product';
+                imageEl.appendChild(img);
+            } else {
+                var noImg = document.createElement('span');
+                noImg.className = 'no-image';
+                noImg.textContent = 'No Image';
+                imageEl.appendChild(noImg);
+            }
+            card.appendChild(imageEl);
+
+            // Info
+            var infoEl = document.createElement('div');
+            infoEl.className = 'favorite-info';
+
+            if (item.product) {
+                var category = document.createElement('div');
+                category.className = 'favorite-category';
+                category.textContent = item.product.category || '';
+                infoEl.appendChild(category);
+
+                var name = document.createElement('div');
+                name.className = 'favorite-name';
+                name.textContent = item.product.name || 'Product';
+                infoEl.appendChild(name);
+
+                var price = document.createElement('div');
+                price.className = 'favorite-price';
+                price.textContent = '\u20B9' + parseFloat(item.product.price).toFixed(2);
+                var unit = document.createElement('span');
+                unit.className = 'price-unit';
+                unit.textContent = ' / ' + (item.product.unit || 'each');
+                price.appendChild(unit);
+                infoEl.appendChild(price);
+            }
+
+            var actionsEl = document.createElement('div');
+            actionsEl.className = 'favorite-actions';
+
+            var viewBtn = document.createElement('a');
+            viewBtn.href = '/shop/product/' + item.product_id;
+            viewBtn.className = 'btn btn-outline';
+            viewBtn.textContent = 'View';
+            actionsEl.appendChild(viewBtn);
+
+            var addCartBtn = document.createElement('button');
+            addCartBtn.className = 'btn btn-primary';
+            addCartBtn.textContent = 'Add to Cart';
+            addCartBtn.onclick = function() { addToCart(item.product_id); };
+            actionsEl.appendChild(addCartBtn);
+
+            infoEl.appendChild(actionsEl);
+            card.appendChild(infoEl);
+            listEl.appendChild(card);
+        });
+    }
+
+    async function removeFavorite(productId, cardEl) {
+        try {
+            var response = await fetch('/api/v1/wishlist/' + productId, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok || response.status === 204) {
+                cardEl.remove();
+                // Check if list is now empty
+                var remaining = document.querySelectorAll('.favorite-card');
+                if (remaining.length === 0) {
+                    loadFavorites();
+                }
+            }
+        } catch (e) {
+            console.error('Error removing favorite:', e);
+        }
+    }
+
+    async function addToCart(productId) {
+        try {
+            var response = await fetch('/api/v1/cart/items', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            });
+
+            if (response.ok) {
+                alert('Added to cart!');
+            } else {
+                var error = await response.json();
+                alert(error.detail || 'Failed to add to cart');
+            }
+        } catch (e) {
+            alert('An error occurred');
+        }
+    }
+
+    // Load favorites on page load
+    loadFavorites();
+</script>
+{% endblock %}

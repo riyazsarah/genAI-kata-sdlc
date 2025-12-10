@@ -1,6 +1,6 @@
 """Authentication API endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
 from app.core.config import get_settings
@@ -297,12 +297,14 @@ class MessageResponse(BaseModel):
 )
 def login(
     login_data: UserLogin,
+    response: Response,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LoginResponse:
     """Authenticate user and return tokens.
 
     Args:
         login_data: User login credentials (email and password).
+        response: FastAPI response object for setting cookies.
         auth_service: Injected auth service.
 
     Returns:
@@ -332,11 +334,41 @@ def login(
                 detail=error_msg,
             )
 
+    # Set access token as HTTP-only cookie for web page authentication
+    response.set_cookie(
+        key="access_token",
+        value=result.token.access_token,  # type: ignore
+        httponly=True,
+        secure=False,  # Set to True in production with HTTPS
+        samesite="lax",
+        max_age=3600,  # 1 hour
+        path="/",
+    )
+
     return LoginResponse(
         message="Login successful",
         user=result.user,  # type: ignore
         token=result.token,  # type: ignore
     )
+
+
+@router.post(
+    "/logout",
+    response_model=MessageResponse,
+    summary="Logout user",
+    description="Clear authentication cookies and logout user.",
+)
+def logout(response: Response) -> MessageResponse:
+    """Logout user by clearing authentication cookies.
+
+    Args:
+        response: FastAPI response object for clearing cookies.
+
+    Returns:
+        MessageResponse confirming logout.
+    """
+    response.delete_cookie(key="access_token", path="/")
+    return MessageResponse(message="Logged out successfully")
 
 
 @router.post(

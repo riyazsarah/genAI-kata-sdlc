@@ -174,3 +174,24 @@ async def validate_cart(
         "valid": len(issues) == 0,
         "issues": issues,
     }
+
+
+@router.post(
+    "/checkout",
+    summary="Checkout cart",
+    description="Process checkout - convert cart items to an order.",
+)
+async def checkout_cart(
+    current_user: UserInDB = Depends(get_current_active_user),
+    cart_service: CartService = Depends(get_cart_service),
+) -> dict:
+    """Process checkout and create an order from cart items."""
+    result = cart_service.checkout(current_user.id)
+
+    if not result["success"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=result.get("message", "Checkout failed"),
+        )
+
+    return result

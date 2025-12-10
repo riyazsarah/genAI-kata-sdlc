@@ -647,7 +647,7 @@
 
     // Format currency
     function formatPrice(price) {
-        return '$' + parseFloat(price).toFixed(2);
+        return '₹' + parseFloat(price).toFixed(2);
     }
 
     // Create SVG icon for trash
@@ -1062,9 +1062,57 @@
         }, 3000);
     }
 
+    // Checkout function
+    function processCheckout() {
+        // Disable button and show loading state
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = 'Processing...';
+
+        fetch(API_BASE + '/checkout', {
+            method: 'POST',
+            headers: Object.assign({
+                'Content-Type': 'application/json'
+            }, getAuthHeader())
+        })
+        .then(function(response) {
+            return response.json().then(function(data) {
+                return { ok: response.ok, data: data };
+            });
+        })
+        .then(function(result) {
+            if (!result.ok) {
+                showToast(result.data.detail || 'Checkout failed', 'error');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceed to Checkout';
+                return;
+            }
+
+            // Success - show confirmation and redirect
+            showToast(result.data.message, 'success');
+
+            // Store order info for confirmation page
+            if (result.data.order) {
+                localStorage.setItem('last_order', JSON.stringify(result.data.order));
+            }
+
+            // Redirect to orders page after short delay
+            setTimeout(function() {
+                window.location.href = '/profile/orders';
+            }, 1500);
+        })
+        .catch(function(error) {
+            console.error('Checkout error:', error);
+            showToast('Checkout failed. Please try again.', 'error');
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = 'Proceed to Checkout';
+        });
+    }
+
     // Event listeners
     checkoutBtn.addEventListener('click', function() {
-        showToast('Checkout feature coming soon!', 'info');
+        if (confirm('Place your order? Your cart items will be converted to an order.')) {
+            processCheckout();
+        }
     });
 
     clearCartBtn.addEventListener('click', clearCart);

@@ -19,7 +19,6 @@ from app.repositories.cart import CartRepository
 from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
 
-
 # Tax rate constant
 TAX_RATE = Decimal("0.08")  # 8% tax
 
@@ -95,9 +94,11 @@ class CartService:
             CartItemResponse with product details.
         """
         # Fetch farmer name if farmer repository is available
+        # Note: products.farmer_id references users.id, not farmers.id
+        # So we look up by user_id
         farmer_name = None
         if self.farmer_repo and product.farmer_id:
-            farmer = self.farmer_repo.get_by_id(product.farmer_id)
+            farmer = self.farmer_repo.get_by_user_id(product.farmer_id)
             if farmer:
                 farmer_name = farmer.farm_name
 
@@ -526,3 +527,98 @@ class CartService:
                 })
 
         return issues
+
+    def checkout(self, user_id: UUID) -> dict:
+        """Process checkout - convert cart to an order.
+
+        Args:
+            user_id: User's UUID.
+
+        Returns:
+            Dict with success status, message, and order details.
+        """
+        # Validate cart has items
+        cart = self.cart_repo.get_cart_by_user_id(user_id)
+        if not cart:
+            return {
+                "success": False,
+                "message": "Your cart is empty",
+                "order": None,
+            }
+
+        cart_items = self.cart_repo.get_cart_items(cart.id)
+        if not cart_items:
+            return {
+                "success": False,
+                "message": "Your cart is empty",
+                "order": None,
+            }
+
+        # Validate stock for all items
+        issues = self.validate_cart_stock(user_id)
+        if issues:
+            return {
+                "success": False,
+                "message": "Some items in your cart have stock issues. Please resolve them before checkout.",
+                "issues": issues,
+                "order": None,
+            }
+
+        # Calculate totals
+        response_items: list[CartItemResponse] = []
+        for cart_item in cart_items:
+            product = self.product_repo.get_by_id(cart_item.product_id)
+            if product:
+                response_items.append(
+                    self._build_cart_item_response(cart_item, product)
+                )
+
+        summary = self._calculate_summary(response_items)
+
+        # Create order using cart repository's db client
+        from app.repositories.order import OrderRepository
+        order_repo = OrderRepository(self.cart_repo.db)
+
+        order = order_repo.create_order(
+            user_id=user_id,
+            total_amount=summary.total,
+        )
+
+        if not order:
+            return {
+                "success": False,
+                "message": "Failed to create order. Please try again.",
+                "order": None,
+            }
+
+        # Create order items (this will trigger inventory decrement via database trigger)
+        for cart_item in cart_items:
+            order_item = order_repo.create_order_item(
+                order_id=order["id"],
+                product_id=cart_item.product_id,
+                quantity=cart_item.quantity,
+                unit_price=cart_item.unit_price,
+            )
+            if not order_item:
+                # Rollback by cancelling the order
+                order_repo.update_order_status(order["id"], "cancelled")
+                return {
+                    "success": False,
+                    "message": "Failed to process order items. Please try again.",
+                    "order": None,
+                }
+
+        # Clear the cart
+        self.cart_repo.clear_cart(cart.id)
+
+        return {
+            "success": True,
+            "message": "Order placed successfully!",
+            "order": {
+                "id": str(order["id"]),
+                "status": order["status"],
+                "total_amount": float(summary.total),
+                "item_count": summary.item_count,
+                "created_at": order["created_at"],
+            },
+        }

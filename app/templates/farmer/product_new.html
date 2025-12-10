@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Product - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <div class="create-header">
+        <a href="/farmer/products" class="back-link">&larr; Back to Products</a>
+        <h1>Add New Product</h1>
+    </div>
+
+    <div id="form-result"></div>
+
+    <form id="product-form"
+          hx-post="/farmer/products"
+          hx-target="#form-result"
+          hx-swap="outerHTML">
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <div class="form-group">
+                <label for="name">Product Name *</label>
+                <input type="text"
+                       id="name"
+                       name="name"
+                       placeholder="e.g., Organic Tomatoes"
+                       required
+                       minlength="1"
+                       maxlength="100">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select a category</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="unit">Unit *</label>
+                    <select id="unit" name="unit" required>
+                        {% for u in units %}
+                        <option value="{{ u }}">{{ u }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description"
+                          name="description"
+                          rows="4"
+                          placeholder="Describe your product - quality, how it's grown, taste, etc."
+                          required
+                          minlength="1"
+                          maxlength="2000"></textarea>
+                <span class="char-count"><span id="desc-count">0</span>/2000</span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Pricing & Inventory</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="price">Price (&#8377;) *</label>
+                    <input type="number"
+                           id="price"
+                           name="price"
+                           placeholder="0.00"
+                           step="0.01"
+                           min="0.01"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Initial Quantity *</label>
+                    <input type="number"
+                           id="quantity"
+                           name="quantity"
+                           placeholder="0"
+                           min="0"
+                           value="0"
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Seasonality</h2>
+            <p class="help-text">Select when this product is typically available</p>
+            <div class="checkbox-group">
+                {% for season in seasons %}
+                <label class="checkbox-label">
+                    <input type="checkbox"
+                           name="seasonality"
+                           value="{{ season }}"
+                           {% if season == 'Year-round' %}checked{% endif %}>
+                    {{ season }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-section info-section">
+            <h2>Images</h2>
+            <p class="help-text">You can add images after creating the product.</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="/farmer/products" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Product</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .create-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .create-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: #3498db;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .create-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: #2c3e50;
+    }
+
+    .form-section {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section h2 {
+        margin: 0 0 1rem 0;
+        color: #2c3e50;
+        font-size: 1.25rem;
+        border-bottom: 2px solid #27ae60;
+        padding-bottom: 0.5rem;
+    }
+
+    .info-section {
+        background: #f8f9fa;
+        border-left: 4px solid #3498db;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .char-count {
+        display: block;
+        text-align: right;
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-label input {
+        width: auto;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+
+    .btn-primary {
+        background: #27ae60;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #219a52;
+    }
+
+    .btn-secondary {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #7f8c8d;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .htmx-request {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .htmx-request .btn-primary::after {
+        content: ' Creating...';
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Character counter for description
+    document.getElementById('description').addEventListener('input', function() {
+        document.getElementById('desc-count').textContent = this.value.length;
+    });
+
+    // Ensure at least one seasonality is selected
+    document.getElementById('product-form').addEventListener('submit', function(e) {
+        var checkboxes = document.querySelectorAll('input[name="seasonality"]:checked');
+        if (checkboxes.length === 0) {
+            // Default to Year-round if nothing selected
+            var yearRound = document.querySelector('input[name="seasonality"][value="Year-round"]');
+            if (yearRound) {
+                yearRound.checked = true;
+            }
+        }
+    });
+</script>
+{% endblock %}

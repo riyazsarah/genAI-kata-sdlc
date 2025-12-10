@@ -4,11 +4,13 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.api.v1.farmer_pages import router as farmer_pages_router
+from app.core.dependencies import AuthRedirectException
+from app.api.v1.profile_pages import router as profile_pages_router
 from app.api.v1.router import api_router
 from app.api.v1.shop_pages import router as shop_pages_router
 from app.core.config import get_settings
@@ -51,11 +53,23 @@ def create_application() -> FastAPI:
     # Include shop page routes (consumer product browsing)
     application.include_router(shop_pages_router)
 
+    # Include profile page routes (consumer dashboard features)
+    application.include_router(profile_pages_router)
+
     return application
 
 
 app = create_application()
 templates = Jinja2Templates(directory=settings.templates_dir)
+
+
+# Exception handler for auth redirects
+@app.exception_handler(AuthRedirectException)
+async def auth_redirect_exception_handler(
+    request: Request, exc: AuthRedirectException
+) -> RedirectResponse:
+    """Handle auth redirect exceptions by redirecting to login page."""
+    return RedirectResponse(url=exc.redirect_url, status_code=303)
 
 
 @app.get("/", response_class=HTMLResponse, tags=["Pages"])

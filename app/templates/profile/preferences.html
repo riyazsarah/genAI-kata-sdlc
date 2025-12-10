@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Preferences - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="preferences-container">
+    <div class="page-header">
+        <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+        <h1>Update Preferences</h1>
+    </div>
+
+    <div class="preferences-sections">
+        <!-- Dietary Preferences Section -->
+        <div class="preference-section">
+            <div class="section-header">
+                <h2>Dietary Preferences</h2>
+                <p class="section-description">Select your dietary preferences to get personalized product recommendations.</p>
+            </div>
+            <form id="dietary-form">
+                <div class="checkbox-grid">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Vegetarian">
+                        <span class="checkbox-label">Vegetarian</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Vegan">
+                        <span class="checkbox-label">Vegan</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Gluten-Free">
+                        <span class="checkbox-label">Gluten-Free</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Dairy-Free">
+                        <span class="checkbox-label">Dairy-Free</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Nut-Free">
+                        <span class="checkbox-label">Nut-Free</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Organic Only">
+                        <span class="checkbox-label">Organic Only</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Low-Sodium">
+                        <span class="checkbox-label">Low-Sodium</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="dietary" value="Keto">
+                        <span class="checkbox-label">Keto</span>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Dietary Preferences</button>
+                </div>
+            </form>
+            <div id="dietary-message" class="message hidden"></div>
+        </div>
+
+        <!-- Communication Preferences Section -->
+        <div class="preference-section">
+            <div class="section-header">
+                <h2>Communication Preferences</h2>
+                <p class="section-description">Choose how you'd like to receive updates from us.</p>
+            </div>
+            <form id="communication-form">
+                <div class="toggle-list">
+                    <div class="toggle-item">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Email Notifications</span>
+                            <span class="toggle-description">Receive order updates, promotions, and newsletters via email</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="email" id="pref-email">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-info">
+                            <span class="toggle-label">SMS Notifications</span>
+                            <span class="toggle-description">Get order and delivery updates via text message</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="sms" id="pref-sms">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Push Notifications</span>
+                            <span class="toggle-description">Receive instant notifications in your browser</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="push" id="pref-push">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Communication Preferences</button>
+                </div>
+            </form>
+            <div id="communication-message" class="message hidden"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .preferences-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: var(--dark);
+    }
+
+    .preferences-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .preference-section {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--dark);
+    }
+
+    .section-description {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin: 0.5rem 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        transition: var(--transition);
+    }
+
+    .checkbox-item:hover {
+        border-color: var(--primary);
+        background: rgba(34, 197, 94, 0.05);
+    }
+
+    .checkbox-item input:checked + .checkbox-label {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .checkbox-item input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+    }
+
+    .toggle-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+
+    .toggle-info {
+        flex: 1;
+    }
+
+    .toggle-label {
+        display: block;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .toggle-description {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 28px;
+        cursor: pointer;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        border-radius: 28px;
+        transition: 0.3s;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: var(--primary);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(22px);
+    }
+
+    .form-actions {
+        margin-top: 1.5rem;
+    }
+
+    .message {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+    }
+
+    .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .message.hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+        window.location.href = '/login';
+    }
+
+    // Load current preferences
+    async function loadPreferences() {
+        try {
+            var response = await fetch('/api/v1/users/profile', {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                var profile = await response.json();
+
+                // Set dietary preferences
+                var dietaryPrefs = profile.dietary_preferences || [];
+                var dietaryCheckboxes = document.querySelectorAll('input[name="dietary"]');
+                dietaryCheckboxes.forEach(function(checkbox) {
+                    checkbox.checked = dietaryPrefs.indexOf(checkbox.value) !== -1;
+                });
+
+                // Set communication preferences
+                var commPrefs = profile.communication_preferences || {};
+                document.getElementById('pref-email').checked = commPrefs.email !== false;
+                document.getElementById('pref-sms').checked = commPrefs.sms === true;
+                document.getElementById('pref-push').checked = commPrefs.push === true;
+            } else if (response.status === 401) {
+                window.location.href = '/login';
+            }
+        } catch (e) {
+            console.error('Error loading preferences:', e);
+        }
+    }
+
+    loadPreferences();
+
+    // Handle dietary form submission
+    document.getElementById('dietary-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var messageEl = document.getElementById('dietary-message');
+
+        var checkboxes = document.querySelectorAll('input[name="dietary"]:checked');
+        var dietaryPrefs = [];
+        checkboxes.forEach(function(cb) {
+            dietaryPrefs.push(cb.value);
+        });
+
+        try {
+            var response = await fetch('/api/v1/users/preferences', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    dietary_preferences: dietaryPrefs
+                })
+            });
+
+            if (response.ok) {
+                messageEl.className = 'message success';
+                messageEl.textContent = 'Dietary preferences saved!';
+            } else {
+                var error = await response.json();
+                messageEl.className = 'message error';
+                messageEl.textContent = error.detail || 'Failed to save preferences';
+            }
+        } catch (e) {
+            messageEl.className = 'message error';
+            messageEl.textContent = 'An error occurred. Please try again.';
+        }
+    });
+
+    // Handle communication form submission
+    document.getElementById('communication-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var messageEl = document.getElementById('communication-message');
+
+        var commPrefs = {
+            email: document.getElementById('pref-email').checked,
+            sms: document.getElementById('pref-sms').checked,
+            push: document.getElementById('pref-push').checked
+        };
+
+        try {
+            var response = await fetch('/api/v1/users/preferences', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    communication_preferences: commPrefs
+                })
+            });
+
+            if (response.ok) {
+                messageEl.className = 'message success';
+                messageEl.textContent = 'Communication preferences saved!';
+            } else {
+                var error = await response.json();
+                messageEl.className = 'message error';
+                messageEl.textContent = error.detail || 'Failed to save preferences';
+            }
+        } catch (e) {
+            messageEl.className = 'message error';
+            messageEl.textContent = 'An error occurred. Please try again.';
+        }
+    });
+</script>
+{% endblock %}

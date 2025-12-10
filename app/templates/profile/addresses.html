@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Addresses - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="addresses-container">
+    <div class="page-header">
+        <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+        <h1>Manage Addresses</h1>
+    </div>
+
+    <div class="addresses-content">
+        <!-- Add Address Form -->
+        <div class="address-form-section">
+            <h2 id="form-title">Add New Address</h2>
+            <form id="address-form">
+                <input type="hidden" id="address-id" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="label">Label</label>
+                        <input type="text" id="label" name="label" placeholder="Home, Work, etc." maxlength="50">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="is_default" name="is_default">
+                            Set as default address
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="street">Street Address *</label>
+                    <input type="text" id="street" name="street" required maxlength="255" placeholder="123 Main St, Apt 4B">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State *</label>
+                        <input type="text" id="state" name="state" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="zip_code">PIN Code *</label>
+                        <input type="text" id="zip_code" name="zip_code" required maxlength="20">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="delivery_instructions">Delivery Instructions</label>
+                    <textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Leave at door, ring bell, etc."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" id="cancel-btn" style="display: none;" onclick="resetForm()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Add Address</button>
+                </div>
+            </form>
+            <div id="form-message" class="message hidden"></div>
+        </div>
+
+        <!-- Addresses List -->
+        <div class="addresses-list-section">
+            <h2>Your Addresses</h2>
+            <div id="addresses-list" class="addresses-list">
+                <div class="loading">Loading addresses...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .addresses-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: var(--dark);
+    }
+
+    .addresses-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .address-form-section, .addresses-list-section {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .address-form-section h2, .addresses-list-section h2 {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.25rem;
+        color: var(--dark);
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1rem;
+    }
+
+    .addresses-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .address-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        position: relative;
+    }
+
+    .address-card.default {
+        border-color: var(--primary);
+        background: rgba(34, 197, 94, 0.05);
+    }
+
+    .address-card .default-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--primary);
+        color: var(--white);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .address-card .address-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .address-card .address-text {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .address-card .address-instructions {
+        font-size: 0.875rem;
+        color: var(--text-lighter);
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    .address-card .address-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .address-card .btn-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.75rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+
+    .message {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+    }
+
+    .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .message.hidden {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .addresses-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+        window.location.href = '/login';
+    }
+
+    var editingAddressId = null;
+
+    // Load addresses
+    async function loadAddresses() {
+        var listEl = document.getElementById('addresses-list');
+        try {
+            var response = await fetch('/api/v1/users/profile', {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                var profile = await response.json();
+                var addresses = profile.addresses || [];
+                renderAddresses(addresses);
+            } else if (response.status === 401) {
+                window.location.href = '/login';
+            }
+        } catch (e) {
+            listEl.textContent = 'Error loading addresses';
+            console.error('Error:', e);
+        }
+    }
+
+    function renderAddresses(addresses) {
+        var listEl = document.getElementById('addresses-list');
+        // Clear existing content
+        while (listEl.firstChild) {
+            listEl.removeChild(listEl.firstChild);
+        }
+
+        if (addresses.length === 0) {
+            var emptyEl = document.createElement('div');
+            emptyEl.className = 'empty-state';
+            emptyEl.textContent = 'No addresses saved yet. Add your first address above.';
+            listEl.appendChild(emptyEl);
+            return;
+        }
+
+        addresses.forEach(function(addr) {
+            var card = document.createElement('div');
+            card.className = 'address-card' + (addr.is_default ? ' default' : '');
+            card.setAttribute('data-id', addr.id);
+
+            if (addr.is_default) {
+                var badge = document.createElement('span');
+                badge.className = 'default-badge';
+                badge.textContent = 'Default';
+                card.appendChild(badge);
+            }
+
+            if (addr.label) {
+                var labelEl = document.createElement('div');
+                labelEl.className = 'address-label';
+                labelEl.textContent = addr.label;
+                card.appendChild(labelEl);
+            }
+
+            var textEl = document.createElement('div');
+            textEl.className = 'address-text';
+            textEl.textContent = addr.street + ', ' + addr.city + ', ' + addr.state + ' ' + addr.zip_code;
+            card.appendChild(textEl);
+
+            if (addr.delivery_instructions) {
+                var instrEl = document.createElement('div');
+                instrEl.className = 'address-instructions';
+                instrEl.textContent = 'Note: ' + addr.delivery_instructions;
+                card.appendChild(instrEl);
+            }
+
+            var actionsEl = document.createElement('div');
+            actionsEl.className = 'address-actions';
+
+            var editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-outline btn-sm';
+            editBtn.textContent = 'Edit';
+            editBtn.onclick = function() { editAddress(addr); };
+            actionsEl.appendChild(editBtn);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-ghost btn-sm';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = function() { deleteAddress(addr.id); };
+            actionsEl.appendChild(deleteBtn);
+
+            card.appendChild(actionsEl);
+            listEl.appendChild(card);
+        });
+    }
+
+    function editAddress(addr) {
+        editingAddressId = addr.id;
+        document.getElementById('address-id').value = addr.id;
+        document.getElementById('label').value = addr.label || '';
+        document.getElementById('street').value = addr.street || '';
+        document.getElementById('city').value = addr.city || '';
+        document.getElementById('state').value = addr.state || '';
+        document.getElementById('zip_code').value = addr.zip_code || '';
+        document.getElementById('delivery_instructions').value = addr.delivery_instructions || '';
+        document.getElementById('is_default').checked = addr.is_default;
+
+        document.getElementById('form-title').textContent = 'Edit Address';
+        document.getElementById('submit-btn').textContent = 'Update Address';
+        document.getElementById('cancel-btn').style.display = 'block';
+    }
+
+    function resetForm() {
+        editingAddressId = null;
+        document.getElementById('address-form').reset();
+        document.getElementById('address-id').value = '';
+        document.getElementById('form-title').textContent = 'Add New Address';
+        document.getElementById('submit-btn').textContent = 'Add Address';
+        document.getElementById('cancel-btn').style.display = 'none';
+        document.getElementById('form-message').className = 'message hidden';
+    }
+
+    async function deleteAddress(addressId) {
+        if (!confirm('Are you sure you want to delete this address?')) return;
+
+        try {
+            var response = await fetch('/api/v1/users/addresses/' + addressId, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok || response.status === 204) {
+                loadAddresses();
+            } else {
+                alert('Failed to delete address');
+            }
+        } catch (e) {
+            alert('An error occurred');
+            console.error('Error:', e);
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('address-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var messageEl = document.getElementById('form-message');
+
+        var data = {
+            label: document.getElementById('label').value || null,
+            street: document.getElementById('street').value,
+            city: document.getElementById('city').value,
+            state: document.getElementById('state').value,
+            zip_code: document.getElementById('zip_code').value,
+            delivery_instructions: document.getElementById('delivery_instructions').value || null,
+            is_default: document.getElementById('is_default').checked
+        };
+
+        try {
+            var url = '/api/v1/users/addresses';
+            var method = 'POST';
+
+            if (editingAddressId) {
+                url = '/api/v1/users/addresses/' + editingAddressId;
+                method = 'PUT';
+            }
+
+            var response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                messageEl.className = 'message success';
+                messageEl.textContent = editingAddressId ? 'Address updated!' : 'Address added!';
+                resetForm();
+                loadAddresses();
+            } else {
+                var error = await response.json();
+                messageEl.className = 'message error';
+                messageEl.textContent = error.detail || 'Failed to save address';
+            }
+        } catch (e) {
+            messageEl.className = 'message error';
+            messageEl.textContent = 'An error occurred. Please try again.';
+        }
+    });
+
+    // Load addresses on page load
+    loadAddresses();
+</script>
+{% endblock %}

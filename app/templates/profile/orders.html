@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="page-header">
+        <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
+        <h1>My Orders</h1>
+    </div>
+
+    <div class="orders-content">
+        <!-- Order Filters -->
+        <div class="orders-filters">
+            <button class="filter-btn active" data-status="all">All Orders</button>
+            <button class="filter-btn" data-status="pending">Pending</button>
+            <button class="filter-btn" data-status="processing">Processing</button>
+            <button class="filter-btn" data-status="shipped">Shipped</button>
+            <button class="filter-btn" data-status="delivered">Delivered</button>
+            <button class="filter-btn" data-status="cancelled">Cancelled</button>
+        </div>
+
+        <!-- Orders List -->
+        <div id="orders-list" class="orders-list">
+            <div class="loading">Loading orders...</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .orders-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: var(--dark);
+    }
+
+    .orders-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--white);
+        color: var(--text);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .filter-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--white);
+    }
+
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .order-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--background);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .order-number {
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .order-date {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-confirmed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-processing {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-shipped {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-delivered {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .order-items {
+        padding: 1rem 1.5rem;
+    }
+
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius);
+        background: var(--background);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .item-quantity {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .item-price {
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--background);
+        border-top: 1px solid var(--border);
+    }
+
+    .order-total {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: var(--background);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-lighter);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--dark);
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+    }
+
+    @media (max-width: 600px) {
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .order-footer {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .order-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        .order-actions .btn {
+            flex: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+        window.location.href = '/login';
+    }
+
+    var currentFilter = 'all';
+
+    // Load orders
+    async function loadOrders(statusFilter) {
+        var listEl = document.getElementById('orders-list');
+        listEl.textContent = '';
+
+        var loadingEl = document.createElement('div');
+        loadingEl.className = 'loading';
+        loadingEl.textContent = 'Loading orders...';
+        listEl.appendChild(loadingEl);
+
+        try {
+            var url = '/api/v1/orders';
+            if (statusFilter && statusFilter !== 'all') {
+                url += '?status=' + statusFilter;
+            }
+
+            var response = await fetch(url, {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                var data = await response.json();
+                renderOrders(data.orders || []);
+            } else if (response.status === 401) {
+                window.location.href = '/login';
+            } else if (response.status === 404) {
+                // Orders endpoint may not exist yet, show empty state
+                renderOrders([]);
+            } else {
+                listEl.textContent = '';
+                var errorEl = document.createElement('div');
+                errorEl.className = 'loading';
+                errorEl.textContent = 'Failed to load orders';
+                listEl.appendChild(errorEl);
+            }
+        } catch (e) {
+            console.error('Error:', e);
+            renderOrders([]);
+        }
+    }
+
+    function renderOrders(orders) {
+        var listEl = document.getElementById('orders-list');
+        listEl.textContent = '';
+
+        if (orders.length === 0) {
+            var emptyEl = document.createElement('div');
+            emptyEl.className = 'empty-state';
+
+            var iconEl = document.createElement('div');
+            iconEl.className = 'empty-state-icon';
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '48');
+            svg.setAttribute('height', '48');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '1.5');
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0');
+            svg.appendChild(path);
+            iconEl.appendChild(svg);
+            emptyEl.appendChild(iconEl);
+
+            var h3 = document.createElement('h3');
+            h3.textContent = 'No orders yet';
+            emptyEl.appendChild(h3);
+
+            var p = document.createElement('p');
+            p.textContent = 'When you place orders, they will appear here.';
+            emptyEl.appendChild(p);
+
+            var link = document.createElement('a');
+            link.href = '/shop';
+            link.className = 'btn btn-primary';
+            link.textContent = 'Start Shopping';
+            emptyEl.appendChild(link);
+
+            listEl.appendChild(emptyEl);
+            return;
+        }
+
+        orders.forEach(function(order) {
+            var card = document.createElement('div');
+            card.className = 'order-card';
+
+            // Header
+            var header = document.createElement('div');
+            header.className = 'order-header';
+
+            var leftInfo = document.createElement('div');
+            var orderNum = document.createElement('span');
+            orderNum.className = 'order-number';
+            orderNum.textContent = 'Order #' + order.id.slice(0, 8).toUpperCase();
+            leftInfo.appendChild(orderNum);
+
+            var orderDate = document.createElement('span');
+            orderDate.className = 'order-date';
+            orderDate.textContent = ' - ' + new Date(order.created_at).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            leftInfo.appendChild(orderDate);
+            header.appendChild(leftInfo);
+
+            var statusEl = document.createElement('span');
+            statusEl.className = 'order-status status-' + order.status;
+            statusEl.textContent = order.status;
+            header.appendChild(statusEl);
+
+            card.appendChild(header);
+
+            // Items
+            var itemsEl = document.createElement('div');
+            itemsEl.className = 'order-items';
+
+            if (order.items && order.items.length > 0) {
+                order.items.forEach(function(item) {
+                    var itemEl = document.createElement('div');
+                    itemEl.className = 'order-item';
+
+                    var imgEl = document.createElement('div');
+                    imgEl.className = 'item-image';
+                    if (item.product_image) {
+                        var img = document.createElement('img');
+                        img.src = item.product_image;
+                        img.alt = item.product_name || 'Product';
+                        imgEl.appendChild(img);
+                    }
+                    itemEl.appendChild(imgEl);
+
+                    var details = document.createElement('div');
+                    details.className = 'item-details';
+                    var name = document.createElement('div');
+                    name.className = 'item-name';
+                    name.textContent = item.product_name || 'Product';
+                    details.appendChild(name);
+                    var qty = document.createElement('div');
+                    qty.className = 'item-quantity';
+                    qty.textContent = 'Qty: ' + item.quantity;
+                    details.appendChild(qty);
+                    itemEl.appendChild(details);
+
+                    var price = document.createElement('div');
+                    price.className = 'item-price';
+                    price.textContent = '\u20B9' + (item.unit_price * item.quantity).toFixed(2);
+                    itemEl.appendChild(price);
+
+                    itemsEl.appendChild(itemEl);
+                });
+            } else {
+                var noItems = document.createElement('div');
+                noItems.textContent = 'Order details not available';
+                noItems.style.color = 'var(--text-light)';
+                noItems.style.padding = '1rem 0';
+                itemsEl.appendChild(noItems);
+            }
+
+            card.appendChild(itemsEl);
+
+            // Footer
+            var footer = document.createElement('div');
+            footer.className = 'order-footer';
+
+            var total = document.createElement('div');
+            total.className = 'order-total';
+            total.textContent = 'Total: \u20B9' + parseFloat(order.total_amount).toFixed(2);
+            footer.appendChild(total);
+
+            var actions = document.createElement('div');
+            actions.className = 'order-actions';
+
+            if (order.status === 'pending') {
+                var cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-ghost btn-sm';
+                cancelBtn.textContent = 'Cancel Order';
+                cancelBtn.onclick = function() { cancelOrder(order.id); };
+                actions.appendChild(cancelBtn);
+            }
+
+            footer.appendChild(actions);
+            card.appendChild(footer);
+
+            listEl.appendChild(card);
+        });
+    }
+
+    async function cancelOrder(orderId) {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+
+        try {
+            var response = await fetch('/api/v1/orders/' + orderId + '/cancel', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                loadOrders(currentFilter);
+            } else {
+                alert('Failed to cancel order');
+            }
+        } catch (e) {
+            alert('An error occurred');
+        }
+    }
+
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-status');
+            loadOrders(currentFilter);
+        });
+    });
+
+    // Load orders on page load
+    loadOrders('all');
+</script>
+{% endblock %}

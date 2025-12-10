@@ -8,8 +8,10 @@ from app.api.v1.cart import router as cart_router
 from app.api.v1.catalog import router as catalog_router
 from app.api.v1.farmers import router as farmers_router
 from app.api.v1.health import router as health_router
+from app.api.v1.orders import router as orders_router
 from app.api.v1.products import router as products_router
 from app.api.v1.users import router as users_router
+from app.api.v1.wishlist import router as wishlist_router
 
 api_router = APIRouter()
 
@@ -20,4 +22,6 @@ api_router.include_router(farmers_router)
 api_router.include_router(products_router)
 api_router.include_router(catalog_router)
 api_router.include_router(cart_router)
+api_router.include_router(orders_router)
+api_router.include_router(wishlist_router)
 api_router.include_router(admin_router)

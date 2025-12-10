@@ -208,6 +208,12 @@
         border-radius: var(--radius);
         object-fit: cover;
         background: var(--background);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-size: 1rem;
+        font-weight: 600;
     }
 
     .status-badge {
@@ -246,6 +252,147 @@
         font-weight: 600;
     }
 
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--white);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .btn-icon:hover {
+        background: var(--background);
+    }
+
+    .btn-icon.edit:hover {
+        border-color: #0ea5e9;
+        color: #0ea5e9;
+    }
+
+    .btn-icon.delete:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .btn-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        color: var(--text-light);
+    }
+
+    .modal-close:hover {
+        color: var(--dark);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 0.9375rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
     /* Pagination */
     .pagination {
         display: flex;
@@ -275,6 +422,34 @@
 
     .pagination span {
         padding: 0.5rem 1rem;
+    }
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius);
+        color: white;
+        font-weight: 500;
+        z-index: 2000;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .toast.success {
+        background: var(--primary);
+    }
+
+    .toast.error {
+        background: #ef4444;
     }
 
     /* Responsive */
@@ -312,6 +487,10 @@
         .admin-table {
             display: block;
             overflow-x: auto;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -415,11 +594,12 @@
                         <th>Quantity</th>
                         <th>Status</th>
                         <th>Farmer</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="products-table-body">
                     <tr>
-                        <td colspan="6" style="text-align: center; color: var(--text-light);">Loading...</td>
+                        <td colspan="7" style="text-align: center; color: var(--text-light);">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -433,6 +613,101 @@
         </div>
     </main>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit Product</h3>
+            <button class="modal-close" onclick="closeEditModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form id="edit-form">
+            <input type="hidden" id="edit-product-id">
+            <div class="form-group">
+                <label for="edit-name">Product Name</label>
+                <input type="text" id="edit-name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-category">Category</label>
+                <select id="edit-category" required>
+                    <option value="Vegetables">Vegetables</option>
+                    <option value="Fruits">Fruits</option>
+                    <option value="Dairy">Dairy</option>
+                    <option value="Meat">Meat</option>
+                    <option value="Eggs">Eggs</option>
+                    <option value="Honey">Honey</option>
+                    <option value="Herbs">Herbs</option>
+                    <option value="Grains">Grains</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-price">Price ($)</label>
+                    <input type="number" id="edit-price" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-quantity">Quantity</label>
+                    <input type="number" id="edit-quantity" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-status">Status</label>
+                <select id="edit-status" required>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Delete Product</h3>
+            <button class="modal-close" onclick="closeDeleteModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <p>Are you sure you want to delete <strong id="delete-product-name"></strong>?</p>
+        <p style="color: #ef4444; font-size: 0.875rem;">This action cannot be undone.</p>
+        <input type="hidden" id="delete-product-id">
+        <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete Product</button>
+        </div>
+    </div>
+</div>
+
+<!-- SVG Templates (hidden) -->
+<div style="display: none;">
+    <svg id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+    <svg id="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </svg>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -473,6 +748,19 @@
     const pageSize = 20;
     let totalProducts = 0;
 
+    // Helper to clone SVG icons
+    function cloneIcon(iconId) {
+        const icon = document.getElementById(iconId);
+        if (icon) {
+            const clone = icon.cloneNode(true);
+            clone.removeAttribute('id');
+            clone.style.width = '16px';
+            clone.style.height = '16px';
+            return clone;
+        }
+        return null;
+    }
+
     // Load products
     async function loadProducts() {
         const status = document.getElementById('status-filter').value;
@@ -510,7 +798,7 @@
         if (products.length === 0) {
             const tr = document.createElement('tr');
             const td = document.createElement('td');
-            td.colSpan = 6;
+            td.colSpan = 7;
             td.style.textAlign = 'center';
             td.style.color = 'var(--text-light)';
             td.textContent = 'No products found';
@@ -521,6 +809,7 @@
 
         products.forEach(product => {
             const tr = document.createElement('tr');
+            tr.dataset.productId = product.id;
 
             // Product cell
             const tdProduct = document.createElement('td');
@@ -529,19 +818,13 @@
 
             const thumb = document.createElement('div');
             thumb.className = 'product-thumb';
-            thumb.style.display = 'flex';
-            thumb.style.alignItems = 'center';
-            thumb.style.justifyContent = 'center';
-            thumb.style.background = 'var(--background)';
-            thumb.style.color = 'var(--text-light)';
-            thumb.style.fontSize = '0.75rem';
             thumb.textContent = product.name.charAt(0).toUpperCase();
 
             const productInfo = document.createElement('div');
             const strong = document.createElement('strong');
             strong.textContent = product.name;
-
             productInfo.appendChild(strong);
+
             productCell.appendChild(thumb);
             productCell.appendChild(productInfo);
             tdProduct.appendChild(productCell);
@@ -574,12 +857,38 @@
             const tdFarmer = document.createElement('td');
             tdFarmer.textContent = product.farmer_name || 'Unknown';
 
+            // Actions cell
+            const tdActions = document.createElement('td');
+            const actionBtns = document.createElement('div');
+            actionBtns.className = 'action-btns';
+
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-icon edit';
+            editBtn.title = 'Edit product';
+            const editIcon = cloneIcon('icon-edit');
+            if (editIcon) editBtn.appendChild(editIcon);
+            editBtn.addEventListener('click', () => openEditModal(product));
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon delete';
+            deleteBtn.title = 'Delete product';
+            const deleteIcon = cloneIcon('icon-delete');
+            if (deleteIcon) deleteBtn.appendChild(deleteIcon);
+            deleteBtn.addEventListener('click', () => openDeleteModal(product));
+
+            actionBtns.appendChild(editBtn);
+            actionBtns.appendChild(deleteBtn);
+            tdActions.appendChild(actionBtns);
+
             tr.appendChild(tdProduct);
             tr.appendChild(tdCategory);
             tr.appendChild(tdPrice);
             tr.appendChild(tdQuantity);
             tr.appendChild(tdStatus);
             tr.appendChild(tdFarmer);
+            tr.appendChild(tdActions);
             tbody.appendChild(tr);
         });
     }
@@ -589,6 +898,100 @@
         document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages || 1}`;
         document.getElementById('prev-btn').disabled = currentPage <= 1;
         document.getElementById('next-btn').disabled = currentPage >= totalPages;
+    }
+
+    // Modal functions
+    function openEditModal(product) {
+        document.getElementById('edit-product-id').value = product.id;
+        document.getElementById('edit-name').value = product.name;
+        document.getElementById('edit-category').value = product.category;
+        document.getElementById('edit-price').value = product.price;
+        document.getElementById('edit-quantity').value = product.quantity;
+        document.getElementById('edit-status').value = product.status;
+        document.getElementById('edit-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.remove('active');
+    }
+
+    function openDeleteModal(product) {
+        document.getElementById('delete-product-id').value = product.id;
+        document.getElementById('delete-product-name').textContent = product.name;
+        document.getElementById('delete-modal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.remove('active');
+    }
+
+    // Form submission
+    document.getElementById('edit-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const productId = document.getElementById('edit-product-id').value;
+        const data = {
+            name: document.getElementById('edit-name').value,
+            category: document.getElementById('edit-category').value,
+            price: parseFloat(document.getElementById('edit-price').value),
+            quantity: parseInt(document.getElementById('edit-quantity').value),
+            status: document.getElementById('edit-status').value
+        };
+
+        try {
+            const response = await fetch(`/api/v1/admin/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showToast('Product updated successfully', 'success');
+                closeEditModal();
+                loadProducts();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Failed to update product', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to update product', 'error');
+        }
+    });
+
+    async function confirmDelete() {
+        const productId = document.getElementById('delete-product-id').value;
+
+        try {
+            const response = await fetch(`/api/v1/admin/products/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                showToast('Product deleted successfully', 'success');
+                closeDeleteModal();
+                loadProducts();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Failed to delete product', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to delete product', 'error');
+        }
+    }
+
+    function showToast(message, type) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + type + ' show';
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
     }
 
     // Event listeners
@@ -619,7 +1022,15 @@
         window.location.href = '/login';
     });
 
-    // Helper functions
+    // Close modals on overlay click
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+    document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    // Helper function
     function capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }

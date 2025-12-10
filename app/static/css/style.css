@@ -327,6 +327,54 @@ main {
     transform: none;
 }
 
+/* Admin Button */
+.btn-admin {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: var(--white);
+    border-color: #8b5cf6;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-admin:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    border-color: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-admin svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Role-based Navigation Links */
+.nav-role-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-role-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Farmer Dashboard Button */
+#nav-farmer-dashboard {
+    color: var(--primary);
+}
+
+#nav-farmer-dashboard:hover {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
 /* ============================================
    Hero Section
    ============================================ */

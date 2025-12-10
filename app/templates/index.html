@@ -278,14 +278,30 @@
 
 {% block extra_scripts %}
 <script>
-    // Check if user is already logged in - redirect to dashboard
+    // Check if user is already logged in - redirect based on role
     (function() {
-        const accessToken = localStorage.getItem('access_token');
-        const user = localStorage.getItem('user');
+        var accessToken = localStorage.getItem('access_token');
+        var userStr = localStorage.getItem('user');
 
-        if (accessToken && user) {
-            // User is logged in, redirect to dashboard
-            window.location.href = '/dashboard';
+        if (accessToken && userStr) {
+            try {
+                var user = JSON.parse(userStr);
+                var userRole = user.role || 'consumer';
+
+                // Redirect based on user role
+                switch (userRole) {
+                    case 'admin':
+                        window.location.href = '/admin/dashboard';
+                        break;
+                    case 'farmer':
+                        window.location.href = '/farmer/dashboard';
+                        break;
+                    default:
+                        window.location.href = '/dashboard';
+                }
+            } catch (e) {
+                // Invalid user data, stay on home page
+            }
         }
     })();
 
