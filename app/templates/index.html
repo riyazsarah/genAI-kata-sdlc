@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to {{ app_name }}</h1>
+    <p>A FastAPI application with Jinja2 templates.</p>
+    <div class="links">
+        <a href="/docs" class="btn">API Documentation</a>
+        <a href="/api/v1/health" class="btn btn-secondary">Health Check</a>
+    </div>
+</section>
+{% endblock %}
