@@ -397,7 +397,7 @@
             </a>
 
             <span class="nav-section">User Management</span>
-            <a href="#" class="nav-item" onclick="alert('Users management coming soon!'); return false;">
+            <a href="/admin/users" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
@@ -406,7 +406,7 @@
                 </svg>
                 All Users
             </a>
-            <a href="#" class="nav-item" onclick="alert('Farmers management coming soon!'); return false;">
+            <a href="/admin/farmers" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5"/>
@@ -416,7 +416,7 @@
             </a>
 
             <span class="nav-section">Content</span>
-            <a href="#" class="nav-item" onclick="alert('Products management coming soon!'); return false;">
+            <a href="/admin/products" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
                     <line x1="3" y1="6" x2="21" y2="6"/>
@@ -474,9 +474,8 @@
                             <circle cx="9" cy="7" r="4"/>
                         </svg>
                     </div>
-                    <span class="stat-change positive">+12%</span>
                 </div>
-                <div class="stat-value">1,247</div>
+                <div class="stat-value" id="stat-users">--</div>
                 <div class="stat-label">Total Users</div>
             </div>
             <div class="admin-stat-card">
@@ -487,9 +486,8 @@
                             <path d="M2 17l10 5 10-5"/>
                         </svg>
                     </div>
-                    <span class="stat-change positive">+8%</span>
                 </div>
-                <div class="stat-value">156</div>
+                <div class="stat-value" id="stat-farmers">--</div>
                 <div class="stat-label">Active Farmers</div>
             </div>
             <div class="admin-stat-card">
@@ -500,9 +498,8 @@
                             <line x1="3" y1="6" x2="21" y2="6"/>
                         </svg>
                     </div>
-                    <span class="stat-change positive">+23%</span>
                 </div>
-                <div class="stat-value">2,834</div>
+                <div class="stat-value" id="stat-products">--</div>
                 <div class="stat-label">Products Listed</div>
             </div>
             <div class="admin-stat-card">
@@ -515,9 +512,8 @@
                             <circle cx="18.5" cy="18.5" r="2.5"/>
                         </svg>
                     </div>
-                    <span class="stat-change positive">+18%</span>
                 </div>
-                <div class="stat-value">892</div>
+                <div class="stat-value" id="stat-orders">--</div>
                 <div class="stat-label">Total Orders</div>
             </div>
         </div>
@@ -528,7 +524,7 @@
             <div class="admin-card">
                 <div class="admin-card-header">
                     <h2>Recent Users</h2>
-                    <a href="#" class="btn btn-sm btn-ghost" onclick="alert('View all users coming soon!'); return false;">View All</a>
+                    <a href="/admin/users" class="btn btn-sm btn-ghost">View All</a>
                 </div>
                 <table class="admin-table">
                     <thead>
@@ -539,48 +535,9 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="users-table-body">
                         <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">JD</div>
-                                    <div>
-                                        <strong>John Doe</strong>
-                                        <br><small style="color: var(--text-light)">john@example.com</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="role-badge consumer">Consumer</span></td>
-                            <td>Today</td>
-                            <td><span style="color: var(--primary)">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">SF</div>
-                                    <div>
-                                        <strong>Sarah Farm</strong>
-                                        <br><small style="color: var(--text-light)">sarah@farm.com</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="role-badge farmer">Farmer</span></td>
-                            <td>Yesterday</td>
-                            <td><span style="color: var(--primary)">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">MJ</div>
-                                    <div>
-                                        <strong>Mike Johnson</strong>
-                                        <br><small style="color: var(--text-light)">mike@test.com</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="role-badge consumer">Consumer</span></td>
-                            <td>2 days ago</td>
-                            <td><span style="color: #f97316">Pending</span></td>
+                            <td colspan="4" style="text-align: center; color: var(--text-light);">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -664,24 +621,27 @@
             if (user.role !== 'admin') {
                 alert('Access denied. Admin privileges required.');
                 window.location.href = '/dashboard';
-                return;
-            }
+            } else {
+                // Display admin info
+                const adminName = document.getElementById('admin-name');
+                if (adminName && user.full_name) {
+                    adminName.textContent = user.full_name;
+                }
 
-            // Display admin info
-            const adminName = document.getElementById('admin-name');
-            if (adminName && user.full_name) {
-                adminName.textContent = user.full_name;
-            }
+                // Set avatar initials
+                const adminAvatar = document.getElementById('admin-avatar');
+                if (adminAvatar && user.full_name) {
+                    const initials = user.full_name.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2);
+                    adminAvatar.textContent = initials;
+                }
 
-            // Set avatar initials
-            const adminAvatar = document.getElementById('admin-avatar');
-            if (adminAvatar && user.full_name) {
-                const initials = user.full_name.split(' ')
-                    .map(n => n[0])
-                    .join('')
-                    .toUpperCase()
-                    .slice(0, 2);
-                adminAvatar.textContent = initials;
+                // Load dashboard data
+                loadDashboardStats();
+                loadRecentUsers();
             }
         } catch (e) {
             console.error('Error parsing user data:', e);
@@ -699,5 +659,150 @@
         localStorage.removeItem('user');
         window.location.href = '/login';
     });
+
+    // Load dashboard stats from API
+    async function loadDashboardStats() {
+        try {
+            const response = await fetch('/api/v1/admin/stats', {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (response.ok) {
+                const stats = await response.json();
+                document.getElementById('stat-users').textContent = stats.total_users.toLocaleString();
+                document.getElementById('stat-farmers').textContent = stats.total_farmers.toLocaleString();
+                document.getElementById('stat-products').textContent = stats.total_products.toLocaleString();
+                document.getElementById('stat-orders').textContent = stats.total_orders.toLocaleString();
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    // Load recent users from API
+    async function loadRecentUsers() {
+        try {
+            const response = await fetch('/api/v1/admin/users?page_size=5', {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                renderUsersTable(data.users);
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+
+    // Render users table
+    function renderUsersTable(users) {
+        const tbody = document.getElementById('users-table-body');
+        tbody.textContent = '';
+
+        if (users.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 4;
+            td.style.textAlign = 'center';
+            td.style.color = 'var(--text-light)';
+            td.textContent = 'No users found';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+        }
+
+        users.forEach(user => {
+            const tr = document.createElement('tr');
+
+            // User cell
+            const tdUser = document.createElement('td');
+            const userCell = document.createElement('div');
+            userCell.className = 'user-cell';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'user-avatar';
+            avatar.textContent = getInitials(user.full_name || user.email);
+
+            const userInfo = document.createElement('div');
+            const strong = document.createElement('strong');
+            strong.textContent = user.full_name || 'Unknown';
+            const br = document.createElement('br');
+            const small = document.createElement('small');
+            small.style.color = 'var(--text-light)';
+            small.textContent = user.email;
+
+            userInfo.appendChild(strong);
+            userInfo.appendChild(br);
+            userInfo.appendChild(small);
+            userCell.appendChild(avatar);
+            userCell.appendChild(userInfo);
+            tdUser.appendChild(userCell);
+
+            // Role cell
+            const tdRole = document.createElement('td');
+            const roleBadge = document.createElement('span');
+            roleBadge.className = 'role-badge ' + (user.role || 'consumer');
+            roleBadge.textContent = capitalize(user.role || 'consumer');
+            tdRole.appendChild(roleBadge);
+
+            // Joined cell
+            const tdJoined = document.createElement('td');
+            tdJoined.textContent = formatDate(user.created_at);
+
+            // Status cell
+            const tdStatus = document.createElement('td');
+            const statusSpan = document.createElement('span');
+            if (user.email_verified) {
+                statusSpan.style.color = 'var(--primary)';
+                statusSpan.textContent = 'Verified';
+            } else {
+                statusSpan.style.color = '#f97316';
+                statusSpan.textContent = 'Pending';
+            }
+            tdStatus.appendChild(statusSpan);
+
+            tr.appendChild(tdUser);
+            tr.appendChild(tdRole);
+            tr.appendChild(tdJoined);
+            tr.appendChild(tdStatus);
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Helper functions
+    function getInitials(name) {
+        if (!name) return '?';
+        return name.split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    }
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return diffDays + ' days ago';
+        return date.toLocaleDateString();
+    }
 </script>
 {% endblock %}

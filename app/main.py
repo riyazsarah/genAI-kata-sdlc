@@ -175,6 +175,45 @@ async def admin_dashboard_page(request: Request) -> HTMLResponse:
     )
 
 
+@app.get("/admin/users", response_class=HTMLResponse, tags=["Pages"])
+async def admin_users_page(request: Request) -> HTMLResponse:
+    """Render the admin users management page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/users.html",
+        context={
+            "app_name": settings.app_name,
+            "version": settings.app_version,
+        },
+    )
+
+
+@app.get("/admin/farmers", response_class=HTMLResponse, tags=["Pages"])
+async def admin_farmers_page(request: Request) -> HTMLResponse:
+    """Render the admin farmers management page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/farmers.html",
+        context={
+            "app_name": settings.app_name,
+            "version": settings.app_version,
+        },
+    )
+
+
+@app.get("/admin/products", response_class=HTMLResponse, tags=["Pages"])
+async def admin_products_page(request: Request) -> HTMLResponse:
+    """Render the admin products management page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/products.html",
+        context={
+            "app_name": settings.app_name,
+            "version": settings.app_version,
+        },
+    )
+
+
 @app.get("/cart", response_class=HTMLResponse, tags=["Pages"])
 async def cart_page(request: Request) -> HTMLResponse:
     """Render the shopping cart page."""

@@ -16,6 +16,7 @@ from app.models.cart import (
     UpdateCartItemRequest,
 )
 from app.repositories.cart import CartRepository
+from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
 
 
@@ -39,15 +40,18 @@ class CartService:
         self,
         cart_repository: CartRepository,
         product_repository: ProductRepository,
+        farmer_repository: FarmerRepository | None = None,
     ) -> None:
         """Initialize the cart service.
 
         Args:
             cart_repository: Repository for cart database operations.
             product_repository: Repository for product database operations.
+            farmer_repository: Repository for farmer database operations.
         """
         self.cart_repo = cart_repository
         self.product_repo = product_repository
+        self.farmer_repo = farmer_repository
 
     # ========================================================================
     # Helper Methods
@@ -90,6 +94,13 @@ class CartService:
         Returns:
             CartItemResponse with product details.
         """
+        # Fetch farmer name if farmer repository is available
+        farmer_name = None
+        if self.farmer_repo and product.farmer_id:
+            farmer = self.farmer_repo.get_by_id(product.farmer_id)
+            if farmer:
+                farmer_name = farmer.farm_name
+
         product_info = CartItemProduct(
             id=product.id,
             name=product.name,
@@ -97,7 +108,7 @@ class CartService:
             unit=product.unit.value,
             images=list(product.images),
             farmer_id=product.farmer_id,
-            farmer_name=None,  # Could be enriched with farmer lookup
+            farmer_name=farmer_name,
             stock_quantity=product.quantity,
             status=product.status.value,
         )

@@ -192,8 +192,21 @@
         font-size: 1.125rem;
         font-weight: 600;
         color: #2c3e50;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
         line-height: 1.3;
+    }
+
+    .product-farm {
+        font-size: 0.8rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-farm svg {
+        color: #94a3b8;
     }
 
     .product-pricing {
@@ -315,6 +328,93 @@
         pointer-events: none;
     }
 
+    /* Quick Add to Cart */
+    .product-card-wrapper {
+        position: relative;
+    }
+
+    .quick-add-btn {
+        position: absolute;
+        bottom: 80px;
+        right: 12px;
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.2s;
+        z-index: 10;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    .product-card-wrapper:hover .quick-add-btn {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .quick-add-btn:hover {
+        background: #1e8449;
+    }
+
+    .quick-add-btn.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .quick-add-btn.success {
+        background: #16a34a;
+    }
+
+    .out-of-stock-label {
+        position: absolute;
+        bottom: 80px;
+        right: 12px;
+        background: #e74c3c;
+        color: #fff;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 10;
+    }
+
+    .cart-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+
+    .cart-toast.success {
+        background: #27ae60;
+    }
+
+    .cart-toast.error {
+        background: #e74c3c;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
     @media (max-width: 768px) {
         .catalog-header h1 {
             font-size: 1.75rem;
@@ -331,6 +431,84 @@
         .filter-select {
             width: 100%;
         }
+
+        .quick-add-btn {
+            opacity: 1;
+            transform: none;
+        }
     }
 </style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function quickAddToCart(productId, button) {
+    var token = localStorage.getItem('access_token');
+
+    if (!token) {
+        showCartToast('Please log in to add items to your cart.', 'error');
+        return;
+    }
+
+    button.classList.add('loading');
+    var originalText = button.textContent;
+
+    fetch('/api/v1/cart/items', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 1
+        })
+    })
+    .then(function(response) {
+        return response.json().then(function(data) {
+            return { ok: response.ok, data: data };
+        });
+    })
+    .then(function(result) {
+        button.classList.remove('loading');
+
+        if (result.ok) {
+            button.classList.add('success');
+            button.textContent = 'Added!';
+            showCartToast(result.data.message || 'Added to cart!', 'success');
+
+            // Update nav cart count
+            if (result.data.cart_summary) {
+                var navCartCount = document.getElementById('nav-cart-count');
+                if (navCartCount) {
+                    navCartCount.textContent = result.data.cart_summary.item_count;
+                    navCartCount.style.display = result.data.cart_summary.item_count > 0 ? 'flex' : 'none';
+                }
+            }
+
+            setTimeout(function() {
+                button.classList.remove('success');
+                button.textContent = originalText;
+            }, 2000);
+        } else {
+            showCartToast(result.data.detail || 'Failed to add to cart.', 'error');
+        }
+    })
+    .catch(function(error) {
+        button.classList.remove('loading');
+        showCartToast('An error occurred. Please try again.', 'error');
+        console.error('Error adding to cart:', error);
+    });
+}
+
+function showCartToast(message, type) {
+    var toast = document.createElement('div');
+    toast.className = 'cart-toast ' + type;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(function() {
+        toast.remove();
+    }, 3000);
+}
+</script>
 {% endblock %}

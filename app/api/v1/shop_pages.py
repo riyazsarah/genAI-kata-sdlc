@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from app.core.config import get_settings
 from app.db.supabase import get_supabase_client
 from app.models.product import ProductCategory
+from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
 from app.services.product import ProductService
 
@@ -22,7 +23,8 @@ def get_product_service() -> ProductService:
     """Dependency to get the product service."""
     db_client = get_supabase_client()
     product_repo = ProductRepository(db_client)
-    return ProductService(product_repo)
+    farmer_repo = FarmerRepository(db_client)
+    return ProductService(product_repo, farmer_repo)
 
 
 @router.get("", response_class=HTMLResponse)

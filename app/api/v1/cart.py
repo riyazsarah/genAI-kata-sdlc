@@ -17,6 +17,7 @@ from app.models.cart import (
 )
 from app.models.user import UserInDB
 from app.repositories.cart import CartRepository
+from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
 from app.services.cart import CartService
 
@@ -36,7 +37,8 @@ def get_cart_service(
     """
     cart_repo = CartRepository(db_client)
     product_repo = ProductRepository(db_client)
-    return CartService(cart_repo, product_repo)
+    farmer_repo = FarmerRepository(db_client)
+    return CartService(cart_repo, product_repo, farmer_repo)
 
 
 # ============================================================================

@@ -10,6 +10,7 @@ from app.models.product import (
     ProductStatus,
     ProductUpdate,
 )
+from app.repositories.farmer import FarmerRepository
 from app.repositories.product import ProductRepository
 
 
@@ -55,13 +56,19 @@ class ProductListResult:
 class ProductService:
     """Service class for product-related business logic."""
 
-    def __init__(self, product_repository: ProductRepository) -> None:
+    def __init__(
+        self,
+        product_repository: ProductRepository,
+        farmer_repository: FarmerRepository | None = None,
+    ) -> None:
         """Initialize the service with a product repository.
 
         Args:
             product_repository: ProductRepository instance for data access.
+            farmer_repository: FarmerRepository instance for farmer data access.
         """
         self.product_repo = product_repository
+        self.farmer_repo = farmer_repository
 
     def _to_response(
         self, product: ProductInDB, include_bulk_pricing: bool = True
@@ -81,9 +88,17 @@ class ProductService:
             bulk_pricing = self.product_repo.get_bulk_pricing(product.id)
             has_bulk_pricing = len(bulk_pricing) > 0
 
+        # Fetch farmer name if farmer repository is available
+        farmer_name = None
+        if self.farmer_repo and product.farmer_id:
+            farmer = self.farmer_repo.get_by_id(product.farmer_id)
+            if farmer:
+                farmer_name = farmer.farm_name
+
         return ProductResponse(
             id=product.id,
             farmer_id=product.farmer_id,
+            farmer_name=farmer_name,
             name=product.name,
             category=product.category,
             description=product.description,

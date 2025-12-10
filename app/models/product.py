@@ -270,6 +270,7 @@ class ProductResponse(BaseModel):
 
     id: UUID
     farmer_id: UUID
+    farmer_name: str | None = None
     name: str
     category: ProductCategory
     description: str
