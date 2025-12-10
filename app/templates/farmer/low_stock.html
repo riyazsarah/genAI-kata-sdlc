@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Low Stock Products - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="low-stock-container">
+    <div class="page-header">
+        <h1>Low Stock Products</h1>
+        <p class="subtitle">Products that need attention</p>
+        <a href="/farmer/products" class="btn btn-secondary">Back to All Products</a>
+    </div>
+
+    <div id="low-stock-list"
+         hx-get="/farmer/products/low-stock/list"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <div class="loading">Loading low-stock products...</div>
+    </div>
+</div>
+
+<style>
+    .low-stock-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+    }
+
+    .subtitle {
+        color: #666;
+        margin: 0 0 1rem 0;
+    }
+
+    .btn-secondary {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #6c757d;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .low-stock-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .low-stock-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        border-left: 4px solid #ffc107;
+    }
+
+    .low-stock-card.out-of-stock {
+        border-left-color: #dc3545;
+    }
+
+    .product-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .product-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .product-category {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .stock-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-low-stock {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .stock-details {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .stock-detail {
+        text-align: center;
+    }
+
+    .stock-detail .label {
+        display: block;
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .stock-detail .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stock-detail .value.danger {
+        color: #dc3545;
+    }
+
+    .stock-detail .value.warning {
+        color: #ffc107;
+    }
+
+    .inventory-update {
+        margin-top: 1rem;
+    }
+
+    .inventory-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .inventory-label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .inventory-input {
+        width: 100px;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .btn-restock {
+        padding: 0.5rem 1rem;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-restock:hover {
+        background: #218838;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-mark-out {
+        padding: 0.5rem 1rem;
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.75rem;
+    }
+
+    .btn-mark-out:hover {
+        background: #c82333;
+    }
+
+    .btn-edit-threshold {
+        padding: 0.5rem 1rem;
+        background: #17a2b8;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.75rem;
+    }
+
+    .btn-edit-threshold:hover {
+        background: #138496;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state h3 {
+        color: #28a745;
+        margin-bottom: 0.5rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+</style>
+{% endblock %}

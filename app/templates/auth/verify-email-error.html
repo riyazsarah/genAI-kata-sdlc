@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Verification Failed - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card text-center">
+        <div class="error-icon">&#10007;</div>
+        <h1>Verification Failed</h1>
+        <p class="auth-subtitle">{{ message }}</p>
+        <div class="links">
+            <a href="/register" class="btn btn-secondary">Register Again</a>
+            <a href="/" class="btn btn-primary">Go Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

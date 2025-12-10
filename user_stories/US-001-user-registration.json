@@ -4,7 +4,7 @@
   "epic": "User Profile Management",
   "priority": "Must Have",
   "iteration": 1,
-  "status": "pending",
+  "status": "completed",
   "description": "As a new consumer, I want to register an account on the Farm-to-Table Marketplace so that I can access personalized features, place orders, and track my purchases.",
   "user_role": "Consumer",
   "business_value": "Enables user acquisition and personalized experience, forming the foundation for all consumer interactions with the platform.",
@@ -86,7 +86,7 @@
         "Click 'Register' button"
       ],
       "expected_result": "User account is created, verification email is sent, success message is displayed",
-      "status": "pending"
+      "status": "passed"
     },
     {
       "id": "TC-001-2",
@@ -99,7 +99,7 @@
         "Attempt to submit form"
       ],
       "expected_result": "Error message 'Please enter a valid email address' is displayed, form is not submitted",
-      "status": "pending"
+      "status": "passed"
     },
     {
       "id": "TC-001-3",
@@ -112,7 +112,7 @@
         "Attempt to submit form"
       ],
       "expected_result": "Error message about password requirements is displayed",
-      "status": "pending"
+      "status": "passed"
     },
     {
       "id": "TC-001-4",
@@ -126,7 +126,7 @@
         "Click 'Register' button"
       ],
       "expected_result": "Error message 'An account with this email already exists' is displayed",
-      "status": "pending"
+      "status": "passed"
     },
     {
       "id": "TC-001-5",
@@ -139,7 +139,7 @@
         "Attempt to log in"
       ],
       "expected_result": "Account is verified, user can log in successfully",
-      "status": "pending"
+      "status": "passed"
     },
     {
       "id": "TC-001-6",
@@ -151,7 +151,7 @@
         "Verify password field"
       ],
       "expected_result": "Password is hashed, not stored in plain text",
-      "status": "pending"
+      "status": "passed"
     }
   ],
   "story_points": 5,

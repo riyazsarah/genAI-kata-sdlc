@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-container">
+    <nav class="breadcrumb">
+        <a href="/shop">Shop</a>
+        <span>/</span>
+        <a href="/shop?category={{ product.category }}">{{ product.category }}</a>
+        <span>/</span>
+        <span>{{ product.name }}</span>
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-gallery">
+            <div class="main-image">
+                {% if product.images and product.images|length > 0 %}
+                <img src="{{ product.images[0] }}" alt="{{ product.name }}" id="main-product-image">
+                {% else %}
+                <div class="no-image">No Image Available</div>
+                {% endif %}
+            </div>
+
+            {% if product.images and product.images|length > 1 %}
+            <div class="thumbnail-strip">
+                {% for img in product.images %}
+                <img src="{{ img }}"
+                     alt="{{ product.name }}"
+                     class="thumbnail {% if loop.first %}active{% endif %}"
+                     onclick="document.getElementById('main-product-image').src='{{ img }}'; document.querySelectorAll('.thumbnail').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <div class="product-category">{{ product.category }}</div>
+            <h1 class="product-name">{{ product.name }}</h1>
+
+            <div class="pricing-section">
+                {% if product.has_active_discount %}
+                <div class="discount-banner">
+                    {% if product.discount_type == 'percentage' %}
+                    Save {{ product.discount_value|int }}%
+                    {% else %}
+                    Save ₹{{ "%.2f"|format(product.discount_value|float) }}
+                    {% endif %}
+                    {% if product.discount_end_date %}
+                    - Ends {{ product.discount_end_date }}
+                    {% endif %}
+                </div>
+                <div class="price-display">
+                    <span class="current-price">₹{{ "%.2f"|format(product.effective_price|float) }}</span>
+                    <span class="original-price">₹{{ "%.2f"|format(product.price|float) }}</span>
+                    <span class="price-unit">/ {{ product.unit }}</span>
+                </div>
+                {% else %}
+                <div class="price-display">
+                    <span class="current-price">₹{{ "%.2f"|format(product.price|float) }}</span>
+                    <span class="price-unit">/ {{ product.unit }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if bulk_pricing and bulk_pricing|length > 0 %}
+            <div class="bulk-pricing-section">
+                <h3>Bulk Pricing</h3>
+                <table class="bulk-pricing-table">
+                    <thead>
+                        <tr>
+                            <th>Quantity</th>
+                            <th>Price per {{ product.unit }}</th>
+                            <th>Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tier in bulk_pricing %}
+                        <tr>
+                            <td>{{ tier.min_quantity }}+</td>
+                            <td>₹{{ "%.2f"|format(tier.price|float) }}</td>
+                            <td class="savings">
+                                Save {{ ((product.price - tier.price) / product.price * 100)|round|int }}%
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <div class="availability-section">
+                <div class="stock-info">
+                    {% if product.quantity == 0 %}
+                    <span class="stock-status out-of-stock">Out of Stock</span>
+                    {% elif product.stock_status == 'low_stock' %}
+                    <span class="stock-status low-stock">Only {{ product.quantity }} left!</span>
+                    {% else %}
+                    <span class="stock-status in-stock">In Stock</span>
+                    <span class="quantity-available">{{ product.quantity }} available</span>
+                    {% endif %}
+                </div>
+
+                {% if product.seasonality %}
+                <div class="seasonality">
+                    <strong>Availability:</strong>
+                    {% for season in product.seasonality %}
+                    <span class="season-tag">{{ season }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="description-section">
+                <h3>Description</h3>
+                <p>{{ product.description }}</p>
+            </div>
+
+            {% if product.quantity > 0 %}
+            <div class="add-to-cart-section">
+                <div class="quantity-selector">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}">
+                </div>
+                <button class="btn btn-primary btn-add-to-cart" disabled>
+                    Add to Cart (Coming Soon)
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="/shop" class="back-link">&larr; Back to Shop</a>
+</div>
+
+<style>
+    .product-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .breadcrumb {
+        margin-bottom: 2rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .breadcrumb a {
+        color: #27ae60;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb span {
+        margin: 0 0.5rem;
+    }
+
+    .product-detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+
+    .product-gallery {
+        position: sticky;
+        top: 2rem;
+        align-self: start;
+    }
+
+    .main-image {
+        width: 100%;
+        aspect-ratio: 1;
+        background: #f5f5f5;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .main-image .no-image {
+        color: #999;
+    }
+
+    .thumbnail-strip {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .thumbnail:hover, .thumbnail.active {
+        opacity: 1;
+    }
+
+    .product-info {
+        padding: 1rem 0;
+    }
+
+    .product-category {
+        font-size: 0.875rem;
+        color: #27ae60;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-name {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin: 0 0 1.5rem 0;
+        line-height: 1.2;
+    }
+
+    .pricing-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .discount-banner {
+        background: #e74c3c;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: inline-block;
+    }
+
+    .price-display {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    .current-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #27ae60;
+    }
+
+    .original-price {
+        font-size: 1.25rem;
+        color: #999;
+        text-decoration: line-through;
+    }
+
+    .price-unit {
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .bulk-pricing-section {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .bulk-pricing-section h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+        color: #2c3e50;
+    }
+
+    .bulk-pricing-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .bulk-pricing-table th, .bulk-pricing-table td {
+        padding: 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .bulk-pricing-table th {
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+    }
+
+    .savings {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .availability-section {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .stock-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .stock-status.in-stock {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .stock-status.low-stock {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .stock-status.out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .quantity-available {
+        color: #666;
+        font-size: 0.875rem;
+    }
+
+    .seasonality {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .season-tag {
+        display: inline-block;
+        background: #e8f5e9;
+        color: #27ae60;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .description-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .description-section h3 {
+        font-size: 1rem;
+        color: #2c3e50;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .description-section p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .add-to-cart-section {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .quantity-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .quantity-selector label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .quantity-selector input {
+        width: 80px;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .btn-add-to-cart {
+        flex: 1;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .btn-add-to-cart:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 2rem;
+        color: #27ae60;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .product-detail {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .product-gallery {
+            position: static;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+        }
+
+        .current-price {
+            font-size: 2rem;
+        }
+
+        .add-to-cart-section {
+            flex-direction: column;
+        }
+
+        .quantity-selector {
+            width: 100%;
+        }
+
+        .quantity-selector input {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

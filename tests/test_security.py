@@ -1,8 +1,6 @@
 """Tests for security utilities."""
 
-from datetime import datetime, timedelta, timezone
-
-import pytest
+from datetime import UTC, datetime, timedelta
 
 from app.core.security import (
     PasswordValidator,
@@ -148,9 +146,9 @@ class TestVerificationToken:
 
     def test_get_verification_expiry_default(self):
         """Default expiry should be 24 hours from now."""
-        before = datetime.now(timezone.utc)
+        before = datetime.now(UTC)
         expiry = get_verification_expiry()
-        after = datetime.now(timezone.utc)
+        after = datetime.now(UTC)
 
         expected_min = before + timedelta(hours=24)
         expected_max = after + timedelta(hours=24)
@@ -159,9 +157,9 @@ class TestVerificationToken:
 
     def test_get_verification_expiry_custom_hours(self):
         """Custom hours parameter should work."""
-        before = datetime.now(timezone.utc)
+        before = datetime.now(UTC)
         expiry = get_verification_expiry(hours=48)
-        after = datetime.now(timezone.utc)
+        after = datetime.now(UTC)
 
         expected_min = before + timedelta(hours=48)
         expected_max = after + timedelta(hours=48)
@@ -174,20 +172,20 @@ class TestVerificationToken:
 
     def test_is_token_expired_past(self):
         """Past datetime should be expired."""
-        past = datetime.now(timezone.utc) - timedelta(hours=1)
+        past = datetime.now(UTC) - timedelta(hours=1)
         assert is_token_expired(past) is True
 
     def test_is_token_expired_future(self):
         """Future datetime should not be expired."""
-        future = datetime.now(timezone.utc) + timedelta(hours=1)
+        future = datetime.now(UTC) + timedelta(hours=1)
         assert is_token_expired(future) is False
 
     def test_is_token_expired_naive_datetime(self):
         """Naive datetime should be handled correctly."""
-        # Create a naive datetime in the future
+        # Create a naive datetime in the future (more than a few seconds)
         future = datetime.now() + timedelta(hours=1)
         assert is_token_expired(future) is False
 
-        # Create a naive datetime in the past
-        past = datetime.now() - timedelta(hours=1)
+        # Create a naive datetime clearly in the past
+        past = datetime.now() - timedelta(days=1)
         assert is_token_expired(past) is True

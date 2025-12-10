@@ -1,6 +1,7 @@
 """User-related Pydantic models."""
 
-from datetime import datetime
+from datetime import date, datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -68,6 +69,18 @@ class UserInDB(BaseModel):
     email_verification_expires_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    failed_login_attempts: int = 0
+    locked_until: datetime | None = None
+    password_reset_token: UUID | None = None
+    password_reset_expires_at: datetime | None = None
+    last_login_at: datetime | None = None
+    # Profile fields (US-003)
+    date_of_birth: date | None = None
+    profile_picture_url: str | None = None
+    dietary_preferences: list[str] = []
+    communication_preferences: dict[str, Any] = {"email": True, "sms": False, "push": False}
+    # Role field (US-004)
+    role: str = "consumer"
 
 
 class UserResponse(BaseModel):
@@ -78,6 +91,7 @@ class UserResponse(BaseModel):
     full_name: str
     phone: str | None
     email_verified: bool
+    role: str = "consumer"
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -105,3 +119,48 @@ class EmailVerificationResponse(BaseModel):
 
     message: str
     verified: bool
+
+
+class UserLogin(BaseModel):
+    """Request model for user login."""
+
+    email: EmailStr = Field(..., description="User's email address")
+    password: str = Field(..., description="User's password")
+
+
+class Token(BaseModel):
+    """Response model for authentication tokens."""
+
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+
+class TokenRefreshRequest(BaseModel):
+    """Request model for token refresh."""
+
+    refresh_token: str = Field(..., description="Refresh token")
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Request model for forgot password."""
+
+    email: EmailStr = Field(..., description="User's email address")
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request model for password reset."""
+
+    token: str = Field(..., description="Password reset token")
+    new_password: str = Field(..., min_length=8, description="New password")
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password meets strength requirements."""
+        is_valid, errors = PasswordValidator.validate(v)
+        if not is_valid:
+            raise ValueError("; ".join(errors))
+        return v
+

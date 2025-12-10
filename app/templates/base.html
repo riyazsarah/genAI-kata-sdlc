@@ -4,13 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header>
         <nav>
-            <a href="/" class="logo">{{ app_name }}</a>
+            <a href="/" class="logo">
+                <svg class="logo-icon" width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Barn shape -->
+                    <path d="M50 8L10 35V90H90V35L50 8Z" fill="url(#barn-gradient)"/>
+                    <!-- Barn roof -->
+                    <path d="M50 2L5 32L10 35L50 8L90 35L95 32L50 2Z" fill="url(#roof-gradient)"/>
+                    <!-- Barn door -->
+                    <path d="M35 55H65V90H35V55Z" fill="#8B4513"/>
+                    <path d="M35 55H50V90H35V55Z" fill="#A0522D"/>
+                    <!-- Door cross beam -->
+                    <rect x="33" y="68" width="34" height="4" fill="#654321"/>
+                    <rect x="48" y="55" width="4" height="35" fill="#654321"/>
+                    <!-- Windows -->
+                    <rect x="18" y="50" width="12" height="12" rx="2" fill="#87CEEB"/>
+                    <rect x="70" y="50" width="12" height="12" rx="2" fill="#87CEEB"/>
+                    <!-- Silo -->
+                    <ellipse cx="85" cy="45" rx="8" ry="4" fill="#9CA3AF"/>
+                    <rect x="77" y="45" width="16" height="45" fill="url(#silo-gradient)"/>
+                    <ellipse cx="85" cy="90" rx="8" ry="4" fill="#6B7280"/>
+                    <!-- Wheat/plant decoration -->
+                    <path d="M50 28C50 28 45 22 50 15C55 22 50 28 50 28Z" fill="#F59E0B"/>
+                    <path d="M50 28C50 28 42 25 45 18" stroke="#F59E0B" stroke-width="2" fill="none"/>
+                    <path d="M50 28C50 28 58 25 55 18" stroke="#F59E0B" stroke-width="2" fill="none"/>
+                    <!-- Gradients -->
+                    <defs>
+                        <linearGradient id="barn-gradient" x1="10" y1="35" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#DC2626"/>
+                            <stop offset="1" stop-color="#991B1B"/>
+                        </linearGradient>
+                        <linearGradient id="roof-gradient" x1="50" y1="2" x2="50" y2="35" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#7F1D1D"/>
+                            <stop offset="1" stop-color="#991B1B"/>
+                        </linearGradient>
+                        <linearGradient id="silo-gradient" x1="77" y1="45" x2="93" y2="90" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#9CA3AF"/>
+                            <stop offset="1" stop-color="#6B7280"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">{{ app_name }}</span>
+            </a>
+            <div class="nav-links" id="nav-links">
+                <!-- Default links for non-authenticated users -->
+                <a href="/login" class="btn btn-ghost" id="login-link">Log In</a>
+                <a href="/register" class="btn btn-primary" id="register-link">Sign Up</a>
+                <!-- Links for authenticated users (hidden by default) -->
+                <div class="nav-user hidden" id="nav-user">
+                    <a href="/shop" class="btn btn-ghost">Shop</a>
+                    <a href="/cart" class="nav-cart-link" id="nav-cart-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <path d="M16 10a4 4 0 0 1-8 0"/>
+                        </svg>
+                        <span class="nav-cart-count" id="nav-cart-count">0</span>
+                    </a>
+                    <a href="/dashboard" class="btn btn-ghost">Dashboard</a>
+                    <div class="nav-user-avatar" id="nav-avatar"></div>
+                    <button class="btn btn-ghost btn-sm" id="nav-logout">Log Out</button>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -19,8 +82,89 @@
     </main>
 
     <footer>
-        <p>Version {{ version }}</p>
+        <p>{{ app_name }} &copy; 2024 &middot; Version {{ version }}</p>
     </footer>
+
+    <script>
+        // Auth state management - runs on every page
+        (function() {
+            var accessToken = localStorage.getItem('access_token');
+            var userStr = localStorage.getItem('user');
+
+            var loginLink = document.getElementById('login-link');
+            var registerLink = document.getElementById('register-link');
+            var navUser = document.getElementById('nav-user');
+            var navAvatar = document.getElementById('nav-avatar');
+            var navLogout = document.getElementById('nav-logout');
+            var navCartCount = document.getElementById('nav-cart-count');
+
+            if (accessToken && userStr) {
+                try {
+                    var user = JSON.parse(userStr);
+
+                    // Hide login/register, show user nav
+                    if (loginLink) loginLink.classList.add('hidden');
+                    if (registerLink) registerLink.classList.add('hidden');
+                    if (navUser) navUser.classList.remove('hidden');
+
+                    // Set avatar initials
+                    if (navAvatar && user.full_name) {
+                        var nameParts = user.full_name.split(' ');
+                        var initials = '';
+                        for (var i = 0; i < nameParts.length && i < 2; i++) {
+                            if (nameParts[i][0]) {
+                                initials += nameParts[i][0].toUpperCase();
+                            }
+                        }
+                        navAvatar.textContent = initials;
+                    }
+
+                    // Load cart count
+                    if (navCartCount) {
+                        loadCartCount(accessToken, navCartCount);
+                    }
+
+                    // Logout handler
+                    if (navLogout) {
+                        navLogout.addEventListener('click', function() {
+                            localStorage.removeItem('access_token');
+                            localStorage.removeItem('refresh_token');
+                            localStorage.removeItem('user');
+                            window.location.href = '/';
+                        });
+                    }
+                } catch (e) {
+                    // Invalid user data, clear storage
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                }
+            }
+
+            // Function to load cart count
+            function loadCartCount(token, countElement) {
+                fetch('/api/v1/cart/count', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return { count: 0 };
+                })
+                .then(function(data) {
+                    var count = data.count || 0;
+                    countElement.textContent = count;
+                    countElement.style.display = count > 0 ? 'flex' : 'none';
+                })
+                .catch(function() {
+                    countElement.style.display = 'none';
+                });
+            }
+        })();
+    </script>
 
     {% block extra_scripts %}{% endblock %}
 </body>

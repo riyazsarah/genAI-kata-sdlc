@@ -151,12 +151,13 @@ class TestUserCreate:
 
         assert user.phone == "+91-9876543210"
 
-    def test_email_is_case_sensitive_in_model(self):
-        """Email should preserve case in model (normalization happens in repo)."""
+    def test_email_domain_is_lowercased_by_pydantic(self):
+        """Email domain is lowercased by Pydantic EmailStr validation."""
         user = UserCreate(
             full_name="John Doe",
             email="John.Doe@Example.COM",
             password="SecurePass123!",
         )
 
-        assert user.email == "John.Doe@Example.COM"
+        # Pydantic EmailStr lowercases the domain part
+        assert user.email == "John.Doe@example.com"

@@ -1,0 +1,89 @@
+<div class="product-card" id="product-{{ product.id }}">
+    <div class="product-image">
+        {% if product.images and product.images|length > 0 %}
+        <img src="{{ product.images[0] }}" alt="{{ product.name }}" loading="lazy">
+        {% else %}
+        <span>No Image</span>
+        {% endif %}
+    </div>
+    <div class="product-info">
+        <div class="product-name">{{ product.name }}</div>
+        <div class="product-price">₹{{ "%.2f"|format(product.price|float) }} / {{ product.unit }}</div>
+        <div class="product-meta">
+            <span>{{ product.category }}</span>
+            <span class="product-status status-{{ product.status }}">{{ product.status }}</span>
+        </div>
+
+        <!-- Stock Status Indicator -->
+        <div class="stock-info">
+            <div class="stock-quantity">
+                <span class="stock-label">Quantity:</span>
+                <span class="stock-value">{{ product.quantity }}</span>
+            </div>
+            {% if product.stock_status %}
+            <span class="stock-status stock-{{ product.stock_status }}">
+                {% if product.stock_status == 'out_of_stock' %}
+                Out of Stock
+                {% elif product.stock_status == 'low_stock' %}
+                Low Stock
+                {% else %}
+                In Stock
+                {% endif %}
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Inventory Quick Update -->
+        <div class="inventory-controls">
+            <form hx-put="/api/v1/farmers/products/{{ product.id }}/inventory"
+                  hx-target="#product-{{ product.id }}"
+                  hx-swap="outerHTML"
+                  hx-headers='{"Content-Type": "application/json"}'
+                  hx-ext="json-enc"
+                  class="inventory-form">
+                <input type="number"
+                       name="quantity"
+                       value="{{ product.quantity }}"
+                       min="0"
+                       class="inventory-input"
+                       title="Update quantity">
+                <button type="submit" class="btn btn-small btn-update" title="Update inventory">
+                    Update
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="product-actions">
+        <a href="/farmer/products/{{ product.id }}/edit" class="btn btn-edit">Edit</a>
+
+        {% if product.status == 'archived' %}
+        <!-- Reactivate button for archived products -->
+        <button class="btn btn-reactivate"
+                hx-put="/api/v1/farmers/products/{{ product.id }}/reactivate"
+                hx-target="#product-{{ product.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Reactivate this product?">
+            Reactivate
+        </button>
+        {% else %}
+        <!-- Archive button for active/inactive products -->
+        <button class="btn btn-archive"
+                hx-put="/api/v1/farmers/products/{{ product.id }}/archive"
+                hx-target="#product-{{ product.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Archive this product? It will be hidden from consumers.">
+            Archive
+        </button>
+        {% endif %}
+
+        <!-- Delete button (with confirmation) -->
+        <button class="btn btn-delete"
+                hx-delete="/api/v1/farmers/products/{{ product.id }}"
+                hx-target="#product-{{ product.id }}"
+                hx-swap="outerHTML swap:1s"
+                hx-confirm="Permanently delete this product? This cannot be undone.">
+            Delete
+        </button>
+    </div>
+</div>

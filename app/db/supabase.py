@@ -3,7 +3,11 @@
 import os
 from functools import lru_cache
 
+from dotenv import load_dotenv
 from supabase import Client, create_client
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 @lru_cache

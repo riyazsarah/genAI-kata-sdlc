@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Dashboard - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="farmer-dashboard">
+    <div class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="farm-avatar" id="farm-avatar">🌾</div>
+            <h3 id="farm-name">Loading...</h3>
+            <span class="farmer-badge" id="profile-status">Setting Up</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="overview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Overview
+            </a>
+            <a href="#" class="nav-item" data-section="farm-details">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Farm Details
+            </a>
+            <a href="#" class="nav-item" data-section="media">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                Photos & Videos
+            </a>
+            <a href="#" class="nav-item" data-section="bank-account">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                Payout Settings
+            </a>
+            <a href="/farmer/products" class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                My Products
+            </a>
+        </nav>
+    </div>
+
+    <div class="dashboard-main">
+        <div class="dashboard-header">
+            <div class="dashboard-welcome">
+                <h1>Welcome back!</h1>
+                <p id="user-greeting">Manage your farm and products</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="/farmer/products/new" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add Product
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Completion Banner -->
+        <div id="completion-banner" class="completion-banner" style="display: none;">
+            <div class="completion-content">
+                <div class="completion-icon">📋</div>
+                <div class="completion-text">
+                    <h3>Complete Your Profile</h3>
+                    <p>Finish setting up your farm profile to start selling products</p>
+                </div>
+                <div class="completion-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="completion-progress" style="width: 25%"></div>
+                    </div>
+                    <span id="completion-text">1 of 4 steps completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area - Sections loaded here -->
+        <div id="main-content" class="dashboard-content">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading your dashboard...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Templates -->
+<template id="overview-template">
+    <div class="overview-section">
+        <div class="stats-grid-4" id="stats-grid"></div>
+        <div class="quick-actions-section">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid" id="actions-grid"></div>
+        </div>
+    </div>
+</template>
+
+<template id="farm-details-template">
+    <div class="form-section-container">
+        <div class="section-header-inline">
+            <h2>Farm Details</h2>
+        </div>
+        <form id="farm-details-form" class="dashboard-form">
+            <div class="form-group">
+                <label for="edit_farm_name">Farm Name</label>
+                <input type="text" id="edit_farm_name" placeholder="Enter your farm name">
+            </div>
+            <div class="form-group">
+                <label for="farm_description">Farm Description</label>
+                <textarea id="farm_description" rows="4" placeholder="Tell customers about your farm..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="farm_street">Street Address</label>
+                    <input type="text" id="farm_street" placeholder="123 Farm Road">
+                </div>
+                <div class="form-group">
+                    <label for="farm_city">City</label>
+                    <input type="text" id="farm_city" placeholder="City">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="farm_state">State</label>
+                    <input type="text" id="farm_state" placeholder="State">
+                </div>
+                <div class="form-group">
+                    <label for="farm_zip">ZIP Code</label>
+                    <input type="text" id="farm_zip" placeholder="12345">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Farming Practices</label>
+                <div class="checkbox-group" id="practices-group">
+                    <label class="checkbox-label"><input type="checkbox" name="practices" value="Organic"> Organic</label>
+                    <label class="checkbox-label"><input type="checkbox" name="practices" value="Sustainable"> Sustainable</label>
+                    <label class="checkbox-label"><input type="checkbox" name="practices" value="Conventional"> Conventional</label>
+                    <label class="checkbox-label"><input type="checkbox" name="practices" value="Biodynamic"> Biodynamic</label>
+                    <label class="checkbox-label"><input type="checkbox" name="practices" value="Regenerative"> Regenerative</label>
+                </div>
+            </div>
+            <div id="form-message" class="alert" style="display: none;"></div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</template>
+
+<template id="media-template">
+    <div class="media-section">
+        <div class="subsection">
+            <div class="subsection-header">
+                <h2>Farm Photos</h2>
+                <button class="btn btn-outline btn-sm" id="add-image-btn">+ Add Photo</button>
+            </div>
+            <div class="images-grid" id="images-grid"></div>
+        </div>
+        <div class="subsection">
+            <div class="subsection-header">
+                <h2>Farm Videos</h2>
+                <button class="btn btn-outline btn-sm" id="add-video-btn">+ Add Video</button>
+            </div>
+            <div class="videos-grid" id="videos-grid"></div>
+        </div>
+    </div>
+</template>
+
+<template id="bank-template">
+    <div class="form-section-container">
+        <div class="section-header-inline">
+            <h2>Payout Settings</h2>
+        </div>
+        <div class="alert alert-info">Your bank account information is encrypted and securely stored.</div>
+        <div id="current-account-info"></div>
+        <form id="bank-account-form" class="dashboard-form">
+            <div class="form-group">
+                <label for="account_holder_name">Account Holder Name</label>
+                <input type="text" id="account_holder_name" required placeholder="Name as it appears on account">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="account_number">Account Number</label>
+                    <input type="text" id="account_number" required placeholder="Enter account number" pattern="[0-9]{4,17}">
+                </div>
+                <div class="form-group">
+                    <label for="routing_number">Routing Number</label>
+                    <input type="text" id="routing_number" required placeholder="9 digits" pattern="[0-9]{9}" maxlength="9">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bank_name">Bank Name</label>
+                    <input type="text" id="bank_name" placeholder="e.g., Chase Bank">
+                </div>
+                <div class="form-group">
+                    <label for="account_type">Account Type</label>
+                    <select id="account_type">
+                        <option value="checking">Checking</option>
+                        <option value="savings">Savings</option>
+                    </select>
+                </div>
+            </div>
+            <div id="bank-form-message" class="alert" style="display: none;"></div>
+            <button type="submit" class="btn btn-primary" id="bank-submit-btn">Add Bank Account</button>
+        </form>
+    </div>
+</template>
+
+<template id="image-modal-template">
+    <div class="modal-overlay" id="image-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Farm Photo</h3>
+                <button class="modal-close" id="close-image-modal">×</button>
+            </div>
+            <form id="add-image-form">
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="image_url" required placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label>Caption (optional)</label>
+                    <input type="text" id="image_caption" placeholder="Describe this image">
+                </div>
+                <div class="form-group">
+                    <label>Alt Text</label>
+                    <input type="text" id="image_alt" placeholder="Describe what's in the image">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="image_primary"> Set as primary image
+                    </label>
+                </div>
+                <div id="image-modal-error" class="alert alert-error" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary btn-block">Add Photo</button>
+            </form>
+        </div>
+    </div>
+</template>
+
+<template id="video-modal-template">
+    <div class="modal-overlay" id="video-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Farm Video</h3>
+                <button class="modal-close" id="close-video-modal">×</button>
+            </div>
+            <form id="add-video-form">
+                <div class="form-group">
+                    <label>YouTube or Vimeo URL</label>
+                    <input type="url" id="video_url" required placeholder="https://youtube.com/watch?v=...">
+                </div>
+                <div class="form-group">
+                    <label>Title (optional)</label>
+                    <input type="text" id="video_title" placeholder="Video title">
+                </div>
+                <div id="video-modal-error" class="alert alert-error" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary btn-block">Add Video</button>
+            </form>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', path='js/farmer-dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,703 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Admin Dashboard Styles */
+    .admin-dashboard {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* Admin Sidebar */
+    .admin-sidebar {
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+
+    .admin-sidebar-header {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .admin-sidebar-header h3 {
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .admin-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(139, 92, 246, 0.3);
+        color: #c4b5fd;
+    }
+
+    /* Admin Nav */
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+    }
+
+    .admin-nav .nav-section {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        padding: 0 0.75rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .admin-nav .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9375rem;
+        transition: var(--transition);
+    }
+
+    .admin-nav .nav-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .admin-nav .nav-item.active {
+        background: rgba(139, 92, 246, 0.3);
+        color: white;
+    }
+
+    .admin-nav .nav-item svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    /* Admin Main */
+    .admin-main {
+        padding: 2rem;
+        background: var(--background);
+    }
+
+    /* Admin Header */
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .admin-header h1 {
+        font-size: 1.75rem;
+        margin: 0;
+    }
+
+    .admin-header p {
+        color: var(--text-light);
+        margin: 0.25rem 0 0;
+    }
+
+    /* Stats Grid */
+    .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .admin-stat-card {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+    }
+
+    .admin-stat-card .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .admin-stat-card .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .admin-stat-card .stat-icon.users { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .admin-stat-card .stat-icon.farmers { background: linear-gradient(135deg, #f97316, #ea580c); }
+    .admin-stat-card .stat-icon.products { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .admin-stat-card .stat-icon.orders { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+    .admin-stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .admin-stat-card .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .admin-stat-card .stat-change {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-stat-card .stat-change.positive {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--primary);
+    }
+
+    /* Admin Grid */
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .admin-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+    }
+
+    .admin-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .admin-card-header h2 {
+        font-size: 1.125rem;
+        margin: 0;
+    }
+
+    /* User Table */
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 0.875rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .admin-table th {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-light);
+    }
+
+    .admin-table td {
+        font-size: 0.9375rem;
+    }
+
+    .admin-table .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .admin-table .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .admin-table .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .admin-table .role-badge.consumer { background: rgba(34, 197, 94, 0.1); color: var(--primary); }
+    .admin-table .role-badge.farmer { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+    .admin-table .role-badge.admin { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+
+    /* Activity List */
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-list li {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .activity-list li:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--background);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-content p {
+        margin: 0 0 0.25rem;
+        font-size: 0.9375rem;
+    }
+
+    .activity-content span {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .admin-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .admin-dashboard {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-sidebar {
+            position: relative;
+            top: 0;
+            height: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .admin-sidebar-header {
+            width: 100%;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .admin-nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .admin-nav .nav-section {
+            display: none;
+        }
+
+        .admin-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-avatar" id="admin-avatar">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <h3 id="admin-name">Admin</h3>
+            <span class="admin-badge">Administrator</span>
+        </div>
+
+        <nav class="admin-nav">
+            <span class="nav-section">Overview</span>
+            <a href="/admin/dashboard" class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Dashboard
+            </a>
+
+            <span class="nav-section">User Management</span>
+            <a href="#" class="nav-item" onclick="alert('Users management coming soon!'); return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                All Users
+            </a>
+            <a href="#" class="nav-item" onclick="alert('Farmers management coming soon!'); return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+                Farmers
+            </a>
+
+            <span class="nav-section">Content</span>
+            <a href="#" class="nav-item" onclick="alert('Products management coming soon!'); return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                Products
+            </a>
+            <a href="#" class="nav-item" onclick="alert('Categories management coming soon!'); return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                Categories
+            </a>
+
+            <span class="nav-section">System</span>
+            <a href="#" class="nav-item" onclick="alert('Settings coming soon!'); return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Settings
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Admin Main Content -->
+    <main class="admin-main">
+        <div class="admin-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Welcome back! Here's what's happening with your platform.</p>
+            </div>
+            <button id="logout-btn" class="btn btn-ghost">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Log Out
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon users">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <span class="stat-change positive">+12%</span>
+                </div>
+                <div class="stat-value">1,247</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon farmers">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="stat-change positive">+8%</span>
+                </div>
+                <div class="stat-value">156</div>
+                <div class="stat-label">Active Farmers</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon products">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                        </svg>
+                    </div>
+                    <span class="stat-change positive">+23%</span>
+                </div>
+                <div class="stat-value">2,834</div>
+                <div class="stat-label">Products Listed</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon orders">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="3" width="15" height="13"/>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                            <circle cx="5.5" cy="18.5" r="2.5"/>
+                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+                    </div>
+                    <span class="stat-change positive">+18%</span>
+                </div>
+                <div class="stat-value">892</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="admin-grid">
+            <!-- Recent Users -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>Recent Users</h2>
+                    <a href="#" class="btn btn-sm btn-ghost" onclick="alert('View all users coming soon!'); return false;">View All</a>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">JD</div>
+                                    <div>
+                                        <strong>John Doe</strong>
+                                        <br><small style="color: var(--text-light)">john@example.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge consumer">Consumer</span></td>
+                            <td>Today</td>
+                            <td><span style="color: var(--primary)">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">SF</div>
+                                    <div>
+                                        <strong>Sarah Farm</strong>
+                                        <br><small style="color: var(--text-light)">sarah@farm.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge farmer">Farmer</span></td>
+                            <td>Yesterday</td>
+                            <td><span style="color: var(--primary)">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">MJ</div>
+                                    <div>
+                                        <strong>Mike Johnson</strong>
+                                        <br><small style="color: var(--text-light)">mike@test.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge consumer">Consumer</span></td>
+                            <td>2 days ago</td>
+                            <td><span style="color: #f97316">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>Recent Activity</h2>
+                </div>
+                <ul class="activity-list">
+                    <li>
+                        <div class="activity-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p>New user registered</p>
+                            <span>2 minutes ago</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="activity-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p>New product listed</p>
+                            <span>15 minutes ago</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="activity-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                                <rect x="1" y="3" width="15" height="13"/>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p>Order completed</p>
+                            <span>1 hour ago</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="activity-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <p>New farmer verified</p>
+                            <span>3 hours ago</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Check if user is logged in and is admin
+    const accessToken = localStorage.getItem('access_token');
+    const userStr = localStorage.getItem('user');
+
+    if (!accessToken || !userStr) {
+        window.location.href = '/login';
+    } else {
+        try {
+            const user = JSON.parse(userStr);
+
+            // Check if user is admin
+            if (user.role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            // Display admin info
+            const adminName = document.getElementById('admin-name');
+            if (adminName && user.full_name) {
+                adminName.textContent = user.full_name;
+            }
+
+            // Set avatar initials
+            const adminAvatar = document.getElementById('admin-avatar');
+            if (adminAvatar && user.full_name) {
+                const initials = user.full_name.split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+                adminAvatar.textContent = initials;
+            }
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    }
+
+    // Logout handler
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    });
+</script>
+{% endblock %}

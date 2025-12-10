@@ -2,9 +2,80 @@
 
 import re
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
+import jwt
+
+from app.core.config import get_settings
+
+
+def create_access_token(
+    subject: str | Any, expires_delta: timedelta | None = None
+) -> str:
+    """Create a new JWT access token.
+
+    Args:
+        subject: The subject of the token (usually user ID).
+        expires_delta: Optional custom expiration time.
+
+    Returns:
+        Encoded JWT string.
+    """
+    settings = get_settings()
+    if expires_delta:
+        expire = datetime.now(UTC) + expires_delta
+    else:
+        expire = datetime.now(UTC) + timedelta(
+            minutes=settings.access_token_expire_minutes
+        )
+
+    to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def create_refresh_token(
+    subject: str | Any, expires_delta: timedelta | None = None
+) -> str:
+    """Create a new JWT refresh token.
+
+    Args:
+        subject: The subject of the token (usually user ID).
+        expires_delta: Optional custom expiration time.
+
+    Returns:
+        Encoded JWT string.
+    """
+    settings = get_settings()
+    if expires_delta:
+        expire = datetime.now(UTC) + expires_delta
+    else:
+        expire = datetime.now(UTC) + timedelta(
+            days=settings.refresh_token_expire_days
+        )
+
+    to_encode = {"exp": expire, "sub": str(subject), "type": "refresh"}
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def verify_token(token: str) -> dict[str, Any] | None:
+    """Verify and decode a JWT token.
+
+    Args:
+        token: The JWT token string.
+
+    Returns:
+        Decoded payload dict if valid, None otherwise.
+    """
+    settings = get_settings()
+    try:
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
+        return payload
+    except jwt.PyJWTError:
+        return None
 
 
 def hash_password(password: str) -> str:
@@ -54,7 +125,7 @@ def get_verification_expiry(hours: int = 24) -> datetime:
     Returns:
         Datetime when the token expires.
     """
-    return datetime.now(timezone.utc) + timedelta(hours=hours)
+    return datetime.now(UTC) + timedelta(hours=hours)
 
 
 def is_token_expired(expiry_time: datetime | None) -> bool:
@@ -68,9 +139,9 @@ def is_token_expired(expiry_time: datetime | None) -> bool:
     """
     if expiry_time is None:
         return True
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if expiry_time.tzinfo is None:
-        expiry_time = expiry_time.replace(tzinfo=timezone.utc)
+        expiry_time = expiry_time.replace(tzinfo=UTC)
     return now > expiry_time
 
 

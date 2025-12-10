@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <h1 id="welcome-title">Welcome back!</h1>
+            <p id="welcome-subtitle">Here's what's happening with your account</p>
+        </div>
+        <div class="dashboard-actions">
+            <a href="/shop" class="btn btn-primary">Browse Products</a>
+            <button id="logout-btn" class="btn btn-ghost">Log Out</button>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </div>
+            <div class="stat-card-content">
+                <span class="stat-card-value">0</span>
+                <span class="stat-card-label">Orders</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <div class="stat-card-content">
+                <span class="stat-card-value">0</span>
+                <span class="stat-card-label">Favorites</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+            </div>
+            <div class="stat-card-content">
+                <span class="stat-card-value">0</span>
+                <span class="stat-card-label">Cart Items</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <div class="stat-card-content">
+                <span class="stat-card-value" id="member-days">-</span>
+                <span class="stat-card-label">Days as Member</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Profile Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <div class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    Profile Information
+                </h2>
+            </div>
+            <div class="profile-info" id="profile-info">
+                <p><strong>Name</strong><span id="user-name">-</span></p>
+                <p><strong>Email</strong><span id="user-email">-</span></p>
+                <p><strong>Member Since</strong><span id="user-created">-</span></p>
+                <p><strong>Email Status</strong><span id="email-status">-</span></p>
+            </div>
+            <a href="#" onclick="alert('Profile editing coming soon!'); return false;" class="btn btn-outline btn-block" style="margin-top: 1rem;">Edit Profile</a>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <div class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                    </div>
+                    Quick Actions
+                </h2>
+            </div>
+            <ul class="action-list">
+                <li><a href="/shop">Browse Fresh Products</a></li>
+                <li><a href="#" onclick="alert('Orders feature coming soon!'); return false;">View My Orders</a></li>
+                <li><a href="#" onclick="alert('Favorites feature coming soon!'); return false;">My Favorite Farms</a></li>
+                <li><a href="#" onclick="alert('Preferences feature coming soon!'); return false;">Update Preferences</a></li>
+                <li><a href="#" onclick="alert('Address management coming soon!'); return false;">Manage Addresses</a></li>
+            </ul>
+        </div>
+
+        <!-- Recent Activity Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <div class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    Recent Activity
+                </h2>
+            </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                </div>
+                <p>No recent activity</p>
+                <span>Start exploring products to see your activity here</span>
+            </div>
+        </div>
+
+        <!-- Recommended Products Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <div class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    Recommended For You
+                </h2>
+            </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                </div>
+                <p>Personalized recommendations coming soon</p>
+                <span>Browse products to get tailored suggestions</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Stats */
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-card-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        flex-shrink: 0;
+    }
+
+    .stat-card-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-card-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+
+    .stat-card-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    /* Card Header */
+    .card-header {
+        margin-bottom: 1rem;
+    }
+
+    .card-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        margin: 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-light);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: var(--background);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-lighter);
+    }
+
+    .empty-state p {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .empty-state span {
+        font-size: 0.875rem;
+    }
+
+    /* Email Status Styles */
+    .email-verified {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .email-pending {
+        color: #f97316;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Check if user is logged in
+    const accessToken = localStorage.getItem('access_token');
+    const userStr = localStorage.getItem('user');
+
+    if (!accessToken || !userStr) {
+        // Redirect to login if not authenticated
+        window.location.href = '/login';
+    } else {
+        try {
+            const user = JSON.parse(userStr);
+
+            // Welcome message
+            const welcomeTitle = document.getElementById('welcome-title');
+            if (welcomeTitle && user.full_name) {
+                const firstName = user.full_name.split(' ')[0];
+                welcomeTitle.textContent = 'Welcome back, ' + firstName + '!';
+            }
+
+            // Profile info - using textContent for security
+            document.getElementById('user-name').textContent = user.full_name || '-';
+            document.getElementById('user-email').textContent = user.email || '-';
+
+            // Member since
+            if (user.created_at) {
+                const createdAt = new Date(user.created_at);
+                document.getElementById('user-created').textContent = createdAt.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Calculate days as member
+                const now = new Date();
+                const diffTime = Math.abs(now - createdAt);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                document.getElementById('member-days').textContent = diffDays;
+            }
+
+            // Email verification status - using safe DOM manipulation
+            const emailStatus = document.getElementById('email-status');
+            if (emailStatus) {
+                // Clear existing content
+                emailStatus.textContent = '';
+
+                // Create span element safely
+                const statusSpan = document.createElement('span');
+                if (user.email_verified) {
+                    statusSpan.className = 'email-verified';
+                    statusSpan.textContent = 'Verified';
+                } else {
+                    statusSpan.className = 'email-pending';
+                    statusSpan.textContent = 'Pending verification';
+                }
+                emailStatus.appendChild(statusSpan);
+            }
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    }
+
+    // Logout handler
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    });
+
+    // Token refresh mechanism - check token expiry and refresh if needed
+    async function checkAndRefreshToken() {
+        const accessToken = localStorage.getItem('access_token');
+        const refreshToken = localStorage.getItem('refresh_token');
+
+        if (!accessToken || !refreshToken) return;
+
+        try {
+            // Decode JWT to check expiry (simple base64 decode)
+            const payload = JSON.parse(atob(accessToken.split('.')[1]));
+            const expiry = payload.exp * 1000; // Convert to milliseconds
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+
+            // If token expires in less than 5 minutes, refresh it
+            if (expiry - now < fiveMinutes) {
+                const response = await fetch('/api/v1/auth/refresh-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    if (data.refresh_token) {
+                        localStorage.setItem('refresh_token', data.refresh_token);
+                    }
+                    console.log('Token refreshed successfully');
+                } else {
+                    // Refresh failed, redirect to login
+                    console.log('Token refresh failed');
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/login';
+                }
+            }
+        } catch (e) {
+            console.error('Error checking token:', e);
+        }
+    }
+
+    // Check token on page load
+    checkAndRefreshToken();
+
+    // Check token every 4 minutes
+    setInterval(checkAndRefreshToken, 4 * 60 * 1000);
+</script>
+{% endblock %}

@@ -1,6 +1,6 @@
 """Health check endpoints for application monitoring."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -39,7 +39,7 @@ async def health_check(
     """Return basic health status of the application."""
     return HealthResponse(
         status="healthy",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         environment=settings.environment,
         version=settings.app_version,
     )

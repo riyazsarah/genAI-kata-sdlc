@@ -1,0 +1,83 @@
+{% if products %}
+<div class="low-stock-grid">
+    {% for product in products %}
+    <div class="low-stock-card {% if product.quantity == 0 %}out-of-stock{% endif %}"
+         id="low-stock-{{ product.id }}">
+        <div class="product-header">
+            <div>
+                <h3 class="product-name">{{ product.name }}</h3>
+                <span class="product-category">{{ product.category }}</span>
+            </div>
+            <span class="stock-badge {% if product.quantity == 0 %}badge-out-of-stock{% else %}badge-low-stock{% endif %}">
+                {% if product.quantity == 0 %}Out of Stock{% else %}Low Stock{% endif %}
+            </span>
+        </div>
+
+        <div class="stock-details">
+            <div class="stock-detail">
+                <span class="label">Current Stock</span>
+                <span class="value {% if product.quantity == 0 %}danger{% else %}warning{% endif %}">
+                    {{ product.quantity }}
+                </span>
+            </div>
+            <div class="stock-detail">
+                <span class="label">Threshold</span>
+                <span class="value">{{ product.low_stock_threshold }}</span>
+            </div>
+            <div class="stock-detail">
+                <span class="label">Unit</span>
+                <span class="value">{{ product.unit }}</span>
+            </div>
+        </div>
+
+        <div class="inventory-update">
+            <form hx-put="/api/v1/farmers/products/{{ product.id }}/inventory"
+                  hx-target="#low-stock-{{ product.id }}"
+                  hx-swap="outerHTML"
+                  hx-headers='{"Content-Type": "application/json"}'
+                  hx-ext="json-enc"
+                  class="inventory-form">
+                <span class="inventory-label">Update stock:</span>
+                <input type="number"
+                       name="quantity"
+                       value="{{ product.quantity }}"
+                       min="0"
+                       class="inventory-input"
+                       placeholder="Qty">
+                <button type="submit" class="btn-restock">
+                    Restock
+                </button>
+            </form>
+        </div>
+
+        <div class="quick-actions">
+            {% if product.quantity > 0 %}
+            <button class="btn-mark-out"
+                    hx-put="/api/v1/farmers/products/{{ product.id }}/availability?in_stock=false"
+                    hx-target="#low-stock-{{ product.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Mark this product as out of stock?">
+                Mark Out of Stock
+            </button>
+            {% else %}
+            <button class="btn-restock"
+                    hx-put="/api/v1/farmers/products/{{ product.id }}/availability?in_stock=true&quantity=10"
+                    hx-target="#low-stock-{{ product.id }}"
+                    hx-swap="outerHTML">
+                Quick Restock (+10)
+            </button>
+            {% endif %}
+            <a href="/farmer/products/{{ product.id }}/edit" class="btn-edit-threshold">
+                Edit Product
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>All stocked up!</h3>
+    <p>None of your products are running low on stock.</p>
+    <a href="/farmer/products" class="btn btn-primary">View All Products</a>
+</div>
+{% endif %}

@@ -1,0 +1,945 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .cart-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .cart-header h1 {
+        font-size: 2rem;
+        color: var(--text-primary);
+    }
+
+    .cart-header .item-count {
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .cart-container {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .cart-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cart Items */
+    .cart-items {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .cart-item {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item:hover {
+        background: var(--bg-secondary);
+    }
+
+    .cart-item-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: var(--bg-secondary);
+        flex-shrink: 0;
+    }
+
+    .cart-item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .cart-item-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .cart-item-category {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .cart-item-unit-price {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .cart-item-stock {
+        font-size: 0.75rem;
+        color: var(--success-color);
+    }
+
+    .cart-item-stock.low {
+        color: var(--warning-color);
+    }
+
+    .cart-item-stock.out {
+        color: var(--error-color);
+    }
+
+    .cart-item-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        min-width: 140px;
+    }
+
+    .cart-item-subtotal {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        padding: 0.25rem;
+    }
+
+    .quantity-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: var(--card-bg);
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: var(--text-primary);
+        font-size: 1.25rem;
+    }
+
+    .quantity-btn:hover:not(:disabled) {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .quantity-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .quantity-value {
+        min-width: 40px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--error-color);
+        cursor: pointer;
+        font-size: 0.875rem;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: opacity 0.2s;
+    }
+
+    .remove-btn:hover {
+        opacity: 0.7;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        position: sticky;
+        top: 100px;
+        height: fit-content;
+    }
+
+    .order-summary h2 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .summary-row .label {
+        color: var(--text-secondary);
+    }
+
+    .summary-row .value {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .summary-row.total {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .summary-row.total .label,
+    .summary-row.total .value {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .summary-row.total .value {
+        color: var(--primary-color);
+    }
+
+    .checkout-btn {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .checkout-btn:hover:not(:disabled) {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .checkout-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .continue-shopping {
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .continue-shopping:hover {
+        color: var(--primary-color);
+    }
+
+    .clear-cart-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: none;
+        border: 1px solid var(--error-color);
+        color: var(--error-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.2s;
+    }
+
+    .clear-cart-btn:hover {
+        background: var(--error-color);
+        color: white;
+    }
+
+    /* Empty Cart */
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+    }
+
+    .empty-cart svg {
+        width: 100px;
+        height: 100px;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-cart h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-cart p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Loading State */
+    .cart-loading {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--border-color);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Stock Issues Alert */
+    .stock-issues {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--error-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stock-issues h4 {
+        color: var(--error-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-issues ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .stock-issues li {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        padding: 0.25rem 0;
+    }
+
+    /* Auth required */
+    .auth-required {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+
+    .auth-required h2 {
+        margin-bottom: 1rem;
+    }
+
+    .auth-required p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+
+    .toast-success {
+        background: var(--success-color);
+    }
+
+    .toast-error {
+        background: var(--error-color);
+    }
+
+    .toast-info {
+        background: var(--primary-color);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="cart-header">
+        <h1>Shopping Cart <span class="item-count" id="header-item-count"></span></h1>
+    </div>
+
+    <!-- Auth Required State -->
+    <div class="auth-required hidden" id="auth-required">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        <h2>Sign in to view your cart</h2>
+        <p>Please log in or create an account to access your shopping cart.</p>
+        <div class="auth-buttons">
+            <a href="/login" class="btn btn-primary">Log In</a>
+            <a href="/register" class="btn btn-ghost">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="cart-loading" id="cart-loading">
+        <div class="spinner"></div>
+        <p>Loading your cart...</p>
+    </div>
+
+    <!-- Empty Cart State -->
+    <div class="empty-cart hidden" id="empty-cart">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <h2>Your cart is empty</h2>
+        <p>Looks like you haven't added any products yet. Start shopping to fill your cart with fresh, local goods!</p>
+        <a href="/shop" class="btn btn-primary">Browse Products</a>
+    </div>
+
+    <!-- Cart Content -->
+    <div class="cart-container hidden" id="cart-content">
+        <div class="cart-items" id="cart-items">
+            <!-- Cart items will be populated here -->
+        </div>
+
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+
+            <div id="stock-issues-container"></div>
+
+            <div class="summary-row">
+                <span class="label">Subtotal</span>
+                <span class="value" id="summary-subtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span class="label">Tax (8%)</span>
+                <span class="value" id="summary-tax">$0.00</span>
+            </div>
+            <div class="summary-row total">
+                <span class="label">Total</span>
+                <span class="value" id="summary-total">$0.00</span>
+            </div>
+
+            <button class="checkout-btn" id="checkout-btn">
+                Proceed to Checkout
+            </button>
+
+            <a href="/shop" class="continue-shopping">Continue Shopping</a>
+
+            <button class="clear-cart-btn" id="clear-cart-btn">
+                Clear Cart
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    const API_BASE = '/api/v1/cart';
+    let currentCart = null;
+
+    // DOM Elements
+    const authRequired = document.getElementById('auth-required');
+    const cartLoading = document.getElementById('cart-loading');
+    const emptyCart = document.getElementById('empty-cart');
+    const cartContent = document.getElementById('cart-content');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const headerItemCount = document.getElementById('header-item-count');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    const stockIssuesContainer = document.getElementById('stock-issues-container');
+
+    // Summary elements
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const summaryTax = document.getElementById('summary-tax');
+    const summaryTotal = document.getElementById('summary-total');
+
+    // Check authentication
+    function isAuthenticated() {
+        return localStorage.getItem('access_token') !== null;
+    }
+
+    function getAuthHeader() {
+        const token = localStorage.getItem('access_token');
+        return token ? { 'Authorization': 'Bearer ' + token } : {};
+    }
+
+    // Show/hide states
+    function showState(state) {
+        authRequired.classList.add('hidden');
+        cartLoading.classList.add('hidden');
+        emptyCart.classList.add('hidden');
+        cartContent.classList.add('hidden');
+
+        switch (state) {
+            case 'auth':
+                authRequired.classList.remove('hidden');
+                break;
+            case 'loading':
+                cartLoading.classList.remove('hidden');
+                break;
+            case 'empty':
+                emptyCart.classList.remove('hidden');
+                break;
+            case 'cart':
+                cartContent.classList.remove('hidden');
+                break;
+        }
+    }
+
+    // Format currency
+    function formatPrice(price) {
+        return '$' + parseFloat(price).toFixed(2);
+    }
+
+    // Create SVG icon for trash
+    function createTrashIcon() {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2');
+        svg.appendChild(path);
+
+        return svg;
+    }
+
+    // Create warning icon
+    function createWarningIcon() {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '10');
+        svg.appendChild(circle);
+
+        const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path1.setAttribute('d', 'M12 8v4');
+        svg.appendChild(path1);
+
+        const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path2.setAttribute('d', 'M12 16h.01');
+        svg.appendChild(path2);
+
+        return svg;
+    }
+
+    // Load cart
+    async function loadCart() {
+        if (!isAuthenticated()) {
+            showState('auth');
+            return;
+        }
+
+        showState('loading');
+
+        try {
+            const response = await fetch(API_BASE, {
+                headers: getAuthHeader()
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user');
+                showState('auth');
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.item_count === 0 || data.message === 'Your cart is empty') {
+                showState('empty');
+                updateHeaderCount(0);
+                return;
+            }
+
+            currentCart = data;
+            renderCart(data);
+            validateStock();
+            showState('cart');
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            showState('empty');
+        }
+    }
+
+    // Render cart items
+    function renderCart(cart) {
+        // Clear existing items
+        while (cartItemsContainer.firstChild) {
+            cartItemsContainer.removeChild(cartItemsContainer.firstChild);
+        }
+
+        cart.items.forEach(function(item) {
+            const itemEl = createCartItemElement(item);
+            cartItemsContainer.appendChild(itemEl);
+        });
+
+        updateSummary(cart.summary);
+        updateHeaderCount(cart.summary.item_count);
+    }
+
+    // Create cart item element using safe DOM methods
+    function createCartItemElement(item) {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.dataset.itemId = item.id;
+
+        // Image
+        const img = document.createElement('img');
+        img.className = 'cart-item-image';
+        img.src = (item.product.images && item.product.images.length > 0)
+            ? item.product.images[0]
+            : '/static/images/product-placeholder.png';
+        img.alt = item.product.name;
+        img.onerror = function() { this.src = '/static/images/product-placeholder.png'; };
+        div.appendChild(img);
+
+        // Details container
+        const details = document.createElement('div');
+        details.className = 'cart-item-details';
+
+        const name = document.createElement('div');
+        name.className = 'cart-item-name';
+        name.textContent = item.product.name;
+        details.appendChild(name);
+
+        const category = document.createElement('div');
+        category.className = 'cart-item-category';
+        category.textContent = item.product.category;
+        details.appendChild(category);
+
+        const unitPrice = document.createElement('div');
+        unitPrice.className = 'cart-item-unit-price';
+        unitPrice.textContent = formatPrice(item.unit_price) + ' / ' + item.product.unit;
+        details.appendChild(unitPrice);
+
+        const stock = document.createElement('div');
+        stock.className = 'cart-item-stock';
+        if (item.product.stock_quantity <= 0) {
+            stock.classList.add('out');
+            stock.textContent = 'Out of stock';
+        } else if (item.product.stock_quantity < 10) {
+            stock.classList.add('low');
+            stock.textContent = 'Only ' + item.product.stock_quantity + ' left';
+        } else {
+            stock.textContent = item.product.stock_quantity + ' in stock';
+        }
+        details.appendChild(stock);
+
+        div.appendChild(details);
+
+        // Actions container
+        const actions = document.createElement('div');
+        actions.className = 'cart-item-actions';
+
+        const subtotal = document.createElement('div');
+        subtotal.className = 'cart-item-subtotal';
+        subtotal.textContent = formatPrice(item.subtotal);
+        actions.appendChild(subtotal);
+
+        // Quantity controls
+        const quantityControls = document.createElement('div');
+        quantityControls.className = 'quantity-controls';
+
+        const decreaseBtn = document.createElement('button');
+        decreaseBtn.className = 'quantity-btn decrease';
+        decreaseBtn.textContent = '-';
+        decreaseBtn.disabled = item.quantity <= 1;
+        decreaseBtn.addEventListener('click', function() {
+            updateQuantity(item.id, item.quantity - 1);
+        });
+        quantityControls.appendChild(decreaseBtn);
+
+        const quantityValue = document.createElement('span');
+        quantityValue.className = 'quantity-value';
+        quantityValue.textContent = item.quantity;
+        quantityControls.appendChild(quantityValue);
+
+        const increaseBtn = document.createElement('button');
+        increaseBtn.className = 'quantity-btn increase';
+        increaseBtn.textContent = '+';
+        increaseBtn.disabled = item.quantity >= item.product.stock_quantity;
+        increaseBtn.addEventListener('click', function() {
+            updateQuantity(item.id, item.quantity + 1);
+        });
+        quantityControls.appendChild(increaseBtn);
+
+        actions.appendChild(quantityControls);
+
+        // Remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.appendChild(createTrashIcon());
+        const removeText = document.createTextNode(' Remove');
+        removeBtn.appendChild(removeText);
+        removeBtn.addEventListener('click', function() {
+            removeItem(item.id);
+        });
+        actions.appendChild(removeBtn);
+
+        div.appendChild(actions);
+
+        return div;
+    }
+
+    // Update summary
+    function updateSummary(summary) {
+        summarySubtotal.textContent = formatPrice(summary.subtotal);
+        summaryTax.textContent = formatPrice(summary.tax_amount);
+        summaryTotal.textContent = formatPrice(summary.total);
+    }
+
+    // Update header count
+    function updateHeaderCount(count) {
+        if (count > 0) {
+            headerItemCount.textContent = '(' + count + ' item' + (count !== 1 ? 's' : '') + ')';
+        } else {
+            headerItemCount.textContent = '';
+        }
+
+        // Also update nav cart count if exists
+        const navCartCount = document.getElementById('nav-cart-count');
+        if (navCartCount) {
+            navCartCount.textContent = count;
+            navCartCount.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+
+    // Update quantity
+    async function updateQuantity(itemId, newQuantity) {
+        if (newQuantity < 1) return;
+
+        try {
+            const response = await fetch(API_BASE + '/items/' + itemId, {
+                method: 'PUT',
+                headers: Object.assign({
+                    'Content-Type': 'application/json'
+                }, getAuthHeader()),
+                body: JSON.stringify({ quantity: newQuantity })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showToast(data.detail || 'Failed to update quantity', 'error');
+                return;
+            }
+
+            if (data.cart) {
+                currentCart = data.cart;
+                renderCart(data.cart);
+            }
+
+            showToast(data.message, 'success');
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showToast('Failed to update quantity', 'error');
+        }
+    }
+
+    // Remove item
+    async function removeItem(itemId) {
+        try {
+            const response = await fetch(API_BASE + '/items/' + itemId, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showToast(data.detail || 'Failed to remove item', 'error');
+                return;
+            }
+
+            if (data.cart) {
+                currentCart = data.cart;
+                renderCart(data.cart);
+            } else {
+                showState('empty');
+                updateHeaderCount(0);
+            }
+
+            showToast(data.message, 'success');
+        } catch (error) {
+            console.error('Error removing item:', error);
+            showToast('Failed to remove item', 'error');
+        }
+    }
+
+    // Clear cart
+    async function clearCart() {
+        if (!confirm('Are you sure you want to clear your entire cart?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(API_BASE, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+
+            const data = await response.json();
+            showState('empty');
+            updateHeaderCount(0);
+            showToast(data.message, 'success');
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+            showToast('Failed to clear cart', 'error');
+        }
+    }
+
+    // Validate stock
+    async function validateStock() {
+        try {
+            const response = await fetch(API_BASE + '/validate', {
+                headers: getAuthHeader()
+            });
+
+            const data = await response.json();
+
+            if (!data.valid && data.issues.length > 0) {
+                renderStockIssues(data.issues);
+                checkoutBtn.disabled = true;
+            } else {
+                // Clear stock issues
+                while (stockIssuesContainer.firstChild) {
+                    stockIssuesContainer.removeChild(stockIssuesContainer.firstChild);
+                }
+                checkoutBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error validating stock:', error);
+        }
+    }
+
+    // Render stock issues using safe DOM methods
+    function renderStockIssues(issues) {
+        // Clear existing
+        while (stockIssuesContainer.firstChild) {
+            stockIssuesContainer.removeChild(stockIssuesContainer.firstChild);
+        }
+
+        const div = document.createElement('div');
+        div.className = 'stock-issues';
+
+        const h4 = document.createElement('h4');
+        h4.appendChild(createWarningIcon());
+        const headerText = document.createTextNode(' Stock Issues');
+        h4.appendChild(headerText);
+        div.appendChild(h4);
+
+        const ul = document.createElement('ul');
+        issues.forEach(function(issue) {
+            const li = document.createElement('li');
+            li.textContent = (issue.product_name || 'Product') + ': ' + issue.issue;
+            ul.appendChild(li);
+        });
+        div.appendChild(ul);
+
+        stockIssuesContainer.appendChild(div);
+    }
+
+    // Toast notification
+    function showToast(message, type) {
+        type = type || 'info';
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(function() {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Event listeners
+    checkoutBtn.addEventListener('click', function() {
+        showToast('Checkout feature coming soon!', 'info');
+    });
+
+    clearCartBtn.addEventListener('click', clearCart);
+
+    // Initialize
+    loadCart();
+})();
+</script>
+{% endblock %}

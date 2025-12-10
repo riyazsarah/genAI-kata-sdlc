@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Product - {{ app_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="edit-header">
+        <a href="/farmer/products" class="back-link">&larr; Back to Products</a>
+        <h1>Edit Product</h1>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+    {% endif %}
+
+    <div id="form-result"></div>
+
+    <form id="product-form"
+          hx-put="/farmer/products/{{ product.id }}"
+          hx-target="#form-result"
+          hx-swap="outerHTML">
+
+        <input type="hidden" name="version" id="product-version" value="{{ product.version }}">
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <div class="form-group">
+                <label for="name">Product Name *</label>
+                <input type="text"
+                       id="name"
+                       name="name"
+                       value="{{ product.name }}"
+                       required
+                       minlength="1"
+                       maxlength="100">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" name="category" required>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if product.category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status *</label>
+                    <select id="status" name="status" required>
+                        <option value="active" {% if product.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if product.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="archived" {% if product.status == 'archived' %}selected{% endif %}>Archived</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description"
+                          name="description"
+                          rows="4"
+                          required
+                          minlength="1"
+                          maxlength="2000">{{ product.description }}</textarea>
+                <span class="char-count"><span id="desc-count">{{ product.description|length }}</span>/2000</span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Pricing & Inventory</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="price">Price (₹) *</label>
+                    <input type="number"
+                           id="price"
+                           name="price"
+                           value="{{ product.price }}"
+                           step="0.01"
+                           min="0.01"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="unit">Unit *</label>
+                    <select id="unit" name="unit" required>
+                        {% for u in units %}
+                        <option value="{{ u }}" {% if product.unit == u %}selected{% endif %}>{{ u }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity *</label>
+                    <input type="number"
+                           id="quantity"
+                           name="quantity"
+                           value="{{ product.quantity }}"
+                           min="0"
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Seasonality</h2>
+            <div class="checkbox-group">
+                {% for season in seasons %}
+                <label class="checkbox-label">
+                    <input type="checkbox"
+                           name="seasonality"
+                           value="{{ season }}"
+                           {% if season in product.seasonality %}checked{% endif %}>
+                    {{ season }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Images</h2>
+            <div id="images-container" class="images-grid">
+                {% for image in product.images %}
+                <div class="image-item" data-url="{{ image }}">
+                    <img src="{{ image }}" alt="Product image">
+                    <button type="button"
+                            class="remove-image-btn"
+                            hx-delete="/farmer/products/{{ product.id }}/images?image_url={{ image|urlencode }}"
+                            hx-target="closest .image-item"
+                            hx-swap="outerHTML"
+                            hx-confirm="Are you sure you want to remove this image?">
+                        &times;
+                    </button>
+                </div>
+                {% endfor %}
+                {% if product.images|length < 5 %}
+                <div class="image-upload">
+                    <label for="new-image">+ Add Image</label>
+                    <input type="file" id="new-image" accept="image/*" style="display: none;">
+                </div>
+                {% endif %}
+            </div>
+            <p class="help-text">Maximum 5 images. Supported formats: JPG, PNG, WebP</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="/farmer/products" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+
+    <div class="product-meta-info">
+        <p>Version: {{ product.version }} | Created: {{ product.created_at }} | Last Updated: {{ product.updated_at }}</p>
+    </div>
+</div>
+
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .edit-header {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        color: #3498db;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .edit-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: #2c3e50;
+    }
+
+    .form-section {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section h2 {
+        margin: 0 0 1rem 0;
+        color: #2c3e50;
+        font-size: 1.25rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .char-count {
+        display: block;
+        text-align: right;
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-label input {
+        width: auto;
+    }
+
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .image-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-image-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .remove-image-btn:hover {
+        background: #c0392b;
+    }
+
+    .image-upload {
+        aspect-ratio: 1;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .image-upload:hover {
+        border-color: #3498db;
+    }
+
+    .image-upload label {
+        cursor: pointer;
+        color: #666;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .product-meta-info {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #999;
+    }
+
+    .btn-secondary {
+        background: #95a5a6;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: #7f8c8d;
+    }
+
+    .htmx-request {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Character counter for description
+    document.getElementById('description').addEventListener('input', function() {
+        document.getElementById('desc-count').textContent = this.value.length;
+    });
+
+    // Handle HTMX events for updating version after save
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful && evt.detail.elt.id === 'product-form') {
+            try {
+                var response = JSON.parse(evt.detail.xhr.responseText);
+                if (response.product && response.product.version) {
+                    document.getElementById('product-version').value = response.product.version;
+                }
+            } catch(e) {
+                // Response might be HTML partial
+            }
+        }
+    });
+</script>
+{% endblock %}

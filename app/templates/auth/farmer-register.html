@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Become a Farmer - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card auth-card-wide">
+        <div class="farmer-register-header">
+            <div class="farmer-icon">🌾</div>
+            <h1>Join as a Farmer</h1>
+            <p class="auth-subtitle">Start selling your farm products directly to consumers</p>
+        </div>
+
+        <div id="error-message" class="alert alert-error" style="display: none;"></div>
+        <div id="success-message" class="alert alert-success" style="display: none;">
+            <strong>Registration successful!</strong><br>
+            <span id="success-text"></span><br>
+            <a href="/login" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">Go to Login</a>
+        </div>
+
+        <form id="farmer-register-form" class="auth-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Personal Information</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">Full Name *</label>
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="full_name"
+                            required
+                            minlength="2"
+                            maxlength="255"
+                            placeholder="Enter your full name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="Enter your email"
+                        >
+                        <span class="field-error" id="email-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            required
+                            maxlength="20"
+                            placeholder="+1234567890"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth *</label>
+                        <input
+                            type="date"
+                            id="date_of_birth"
+                            name="date_of_birth"
+                            required
+                        >
+                        <span class="field-hint">Must be 18 years or older</span>
+                        <span class="field-error" id="dob-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        minlength="8"
+                        placeholder="Create a password"
+                    >
+                    <span class="field-error" id="password-error"></span>
+                    <div class="password-requirements">
+                        <p>Password must contain:</p>
+                        <ul>
+                            <li id="req-length">At least 8 characters</li>
+                            <li id="req-upper">One uppercase letter</li>
+                            <li id="req-lower">One lowercase letter</li>
+                            <li id="req-digit">One digit</li>
+                            <li id="req-special">One special character (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">Farm Information</h3>
+
+                <div class="form-group">
+                    <label for="farm_name">Farm Name *</label>
+                    <input
+                        type="text"
+                        id="farm_name"
+                        name="farm_name"
+                        required
+                        minlength="2"
+                        maxlength="200"
+                        placeholder="Enter your farm name"
+                    >
+                    <span class="field-hint">This will be displayed to customers</span>
+                </div>
+            </div>
+
+            <div class="form-agreement">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="terms" required>
+                    <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <span id="btn-text">Create Farmer Account</span>
+                <span id="btn-loading" style="display: none;">
+                    <span class="loading-spinner"></span>
+                    Creating account...
+                </span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login">Log in</a></p>
+            <p>Want to buy products instead? <a href="/register">Sign up as a customer</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const form = document.getElementById('farmer-register-form');
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+    const successText = document.getElementById('success-text');
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+    const passwordInput = document.getElementById('password');
+    const dobInput = document.getElementById('date_of_birth');
+
+    // Set max date for DOB (must be 18+)
+    const today = new Date();
+    const minAge = 18;
+    const maxDate = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+    dobInput.max = maxDate.toISOString().split('T')[0];
+
+    // Password validation requirements
+    const requirements = {
+        length: { regex: /.{8,}/, element: document.getElementById('req-length') },
+        upper: { regex: /[A-Z]/, element: document.getElementById('req-upper') },
+        lower: { regex: /[a-z]/, element: document.getElementById('req-lower') },
+        digit: { regex: /[0-9]/, element: document.getElementById('req-digit') },
+        special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('req-special') }
+    };
+
+    // Real-time password validation
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        for (const [key, req] of Object.entries(requirements)) {
+            if (req.regex.test(password)) {
+                req.element.classList.add('valid');
+                req.element.classList.remove('invalid');
+            } else {
+                req.element.classList.remove('valid');
+                req.element.classList.add('invalid');
+            }
+        }
+    });
+
+    // Email validation
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('email-error');
+
+    emailInput.addEventListener('blur', function() {
+        const email = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (email && !emailRegex.test(email)) {
+            emailError.textContent = 'Please enter a valid email address';
+            this.classList.add('input-error');
+        } else {
+            emailError.textContent = '';
+            this.classList.remove('input-error');
+        }
+    });
+
+    // DOB validation
+    const dobError = document.getElementById('dob-error');
+    dobInput.addEventListener('change', function() {
+        const dob = new Date(this.value);
+        const age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
+
+        if (age < 18) {
+            dobError.textContent = 'You must be at least 18 years old';
+            this.classList.add('input-error');
+        } else {
+            dobError.textContent = '';
+            this.classList.remove('input-error');
+        }
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Hide previous messages
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        // Show loading state
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline-flex';
+        form.querySelector('button[type="submit"]').disabled = true;
+
+        const formData = {
+            full_name: document.getElementById('full_name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            phone: document.getElementById('phone').value,
+            date_of_birth: document.getElementById('date_of_birth').value,
+            farm_name: document.getElementById('farm_name').value
+        };
+
+        try {
+            const response = await fetch('/api/v1/auth/farmer/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successText.textContent = data.message;
+                successDiv.style.display = 'block';
+                form.reset();
+                // Reset password requirements display
+                for (const req of Object.values(requirements)) {
+                    req.element.classList.remove('valid', 'invalid');
+                }
+            } else {
+                errorDiv.textContent = data.detail || 'Registration failed. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            errorDiv.textContent = 'An error occurred. Please try again later.';
+            errorDiv.style.display = 'block';
+        } finally {
+            // Reset button state
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            form.querySelector('button[type="submit"]').disabled = false;
+        }
+    });
+</script>
+{% endblock %}

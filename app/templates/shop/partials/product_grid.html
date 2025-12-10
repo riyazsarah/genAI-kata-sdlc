@@ -1,0 +1,91 @@
+{% if products %}
+<div class="products-grid">
+    {% for product in products %}
+    <a href="/shop/product/{{ product.id }}" class="product-card">
+        <div class="product-image">
+            {% if product.images and product.images|length > 0 %}
+            <img src="{{ product.images[0] }}" alt="{{ product.name }}" loading="lazy">
+            {% else %}
+            <span class="no-image">No Image</span>
+            {% endif %}
+
+            {% if product.has_active_discount %}
+            <span class="discount-badge">
+                {% if product.discount_type == 'percentage' %}
+                {{ product.discount_value|int }}% OFF
+                {% else %}
+                ₹{{ "%.2f"|format(product.discount_value|float) }} OFF
+                {% endif %}
+            </span>
+            {% endif %}
+
+            {% if product.seasonality and product.seasonality[0] != 'Year-round' %}
+            <span class="season-badge">{{ product.seasonality[0] }}</span>
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <div class="product-category">{{ product.category }}</div>
+            <div class="product-name">{{ product.name }}</div>
+
+            <div class="product-pricing">
+                {% if product.has_active_discount %}
+                <span class="current-price">₹{{ "%.2f"|format(product.effective_price|float) }}</span>
+                <span class="original-price">₹{{ "%.2f"|format(product.price|float) }}</span>
+                {% else %}
+                <span class="current-price">₹{{ "%.2f"|format(product.price|float) }}</span>
+                {% endif %}
+                <span class="price-unit">/ {{ product.unit }}</span>
+            </div>
+
+            <div class="product-meta">
+                <span>{{ product.quantity }} available</span>
+                {% if product.stock_status %}
+                <span class="stock-status stock-{{ product.stock_status }}">
+                    {% if product.stock_status == 'low_stock' %}Low Stock{% else %}In Stock{% endif %}
+                </span>
+                {% endif %}
+            </div>
+
+            {% if product.has_bulk_pricing %}
+            <div class="bulk-pricing-hint">Bulk discounts available</div>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    <a href="#"
+       class="{% if page <= 1 %}disabled{% endif %}"
+       hx-get="/shop/products?page={{ page - 1 }}{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+       hx-target="#products-grid"
+       hx-swap="innerHTML">Prev</a>
+
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+        <a href="#"
+           class="{% if p == page %}active{% endif %}"
+           hx-get="/shop/products?page={{ p }}{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+           hx-target="#products-grid"
+           hx-swap="innerHTML">{{ p }}</a>
+        {% elif p == page - 2 or p == page + 2 %}
+        <span>...</span>
+        {% endif %}
+    {% endfor %}
+
+    <a href="#"
+       class="{% if page >= total_pages %}disabled{% endif %}"
+       hx-get="/shop/products?page={{ page + 1 }}{% if category %}&category={{ category }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+       hx-target="#products-grid"
+       hx-swap="innerHTML">Next</a>
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <h3>No products found</h3>
+    <p>Try adjusting your search or filters</p>
+</div>
+{% endif %}

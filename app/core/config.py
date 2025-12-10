@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_name: str = Field(default="FastAPI App", description="Application name")
+    app_name: str = Field(default="Farmary", description="Application name")
     app_version: str = Field(default="1.0.0", description="Application version")
     debug: bool = Field(default=False, description="Debug mode flag")
     environment: Literal["development", "staging", "production"] = Field(
@@ -36,6 +36,19 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = Field(default="/api/v1", description="API v1 prefix")
+
+    # Security (for future JWT implementation)
+    secret_key: str = Field(
+        default="change-me-in-production-use-strong-random-key",
+        description="Secret key for JWT generation",
+    )
+    algorithm: str = Field(default="HS256", description="Algorithm for JWT generation")
+    access_token_expire_minutes: int = Field(
+        default=30, description="Access token expiration in minutes"
+    )
+    refresh_token_expire_days: int = Field(
+        default=7, description="Refresh token expiration in days"
+    )
 
     # Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
