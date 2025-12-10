@@ -1,0 +1,169 @@
+{
+  "id": "US-007",
+  "title": "Update Product Listing",
+  "epic": "Product Listing Management",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a farmer, I want to update my existing product listings so that I can keep product information accurate and current for consumers.",
+  "user_role": "Farmer",
+  "business_value": "Ensures product information remains accurate, maintaining consumer trust and reducing order issues.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-007-1",
+      "description": "Farmer can access edit mode for any product",
+      "given": "Farmer is viewing their product list",
+      "when": "Farmer clicks 'Edit' on a product",
+      "then": "Product edit form is displayed with current values"
+    },
+    {
+      "id": "AC-007-2",
+      "description": "Farmer can update any product field",
+      "given": "Farmer is on product edit form",
+      "when": "Farmer modifies any field and saves",
+      "then": "Changes are saved and reflected immediately"
+    },
+    {
+      "id": "AC-007-3",
+      "description": "Farmer can add or remove product images",
+      "given": "Farmer is editing a product",
+      "when": "Farmer adds new images or removes existing ones",
+      "then": "Image gallery is updated accordingly"
+    },
+    {
+      "id": "AC-007-4",
+      "description": "Changes are reflected in real-time",
+      "given": "Farmer has updated a product",
+      "when": "Consumer views the product",
+      "then": "Updated information is displayed"
+    },
+    {
+      "id": "AC-007-5",
+      "description": "Significant changes trigger customer notifications",
+      "given": "Product has existing orders or subscribers",
+      "when": "Price changes or product goes out of stock",
+      "then": "Affected customers receive notification"
+    }
+  ],
+  "technical_notes": [
+    "Track product history for audit purposes",
+    "Implement optimistic locking to prevent concurrent edit conflicts",
+    "Cache invalidation on product update",
+    "Notification system integration for significant changes"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/products/{id}",
+      "description": "Get product details for editing"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}",
+      "description": "Update product"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/farmers/products/{id}/images/{imageId}",
+      "description": "Remove product image"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-007-1",
+      "type": "positive",
+      "title": "Farmer successfully updates product name",
+      "preconditions": ["Farmer has an existing product"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Edit' on a product",
+        "Change name from 'Organic Tomatoes' to 'Heirloom Tomatoes'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Product name is updated, confirmation shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-2",
+      "type": "positive",
+      "title": "Farmer updates product price",
+      "preconditions": ["Farmer has an existing product"],
+      "steps": [
+        "Navigate to product edit form",
+        "Change price from '4.99' to '5.49'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Price is updated, change is reflected for consumers",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-3",
+      "type": "positive",
+      "title": "Farmer adds new image to existing product",
+      "preconditions": ["Farmer has a product with 2 images"],
+      "steps": [
+        "Navigate to product edit form",
+        "Upload additional image",
+        "Click 'Save'"
+      ],
+      "expected_result": "Product now has 3 images",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-4",
+      "type": "positive",
+      "title": "Farmer removes image from product",
+      "preconditions": ["Farmer has a product with 3 images"],
+      "steps": [
+        "Navigate to product edit form",
+        "Click 'Remove' on an image",
+        "Confirm deletion",
+        "Click 'Save'"
+      ],
+      "expected_result": "Image is removed, product has 2 images",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-5",
+      "type": "positive",
+      "title": "Farmer updates product seasonality",
+      "preconditions": ["Farmer has a product with Summer seasonality"],
+      "steps": [
+        "Navigate to product edit form",
+        "Change seasonality to 'Year-round'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Seasonality is updated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-6",
+      "type": "negative",
+      "title": "Update fails with invalid data",
+      "preconditions": ["Farmer has an existing product"],
+      "steps": [
+        "Navigate to product edit form",
+        "Clear the product name field",
+        "Click 'Save'"
+      ],
+      "expected_result": "Validation error is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-007-7",
+      "type": "integration",
+      "title": "Consumer sees updated product information",
+      "preconditions": ["Farmer has updated a product"],
+      "steps": [
+        "Log in as consumer",
+        "Navigate to the updated product"
+      ],
+      "expected_result": "Consumer sees the latest product information",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

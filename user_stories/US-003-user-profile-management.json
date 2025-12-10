@@ -1,0 +1,254 @@
+{
+  "id": "US-003",
+  "title": "User Profile Management",
+  "epic": "User Profile Management",
+  "priority": "Must Have",
+  "iteration": 1,
+  "status": "pending",
+  "description": "As a registered consumer, I want to manage my profile information including personal details, address, payment methods, and preferences so that I can have a personalized shopping experience.",
+  "user_role": "Consumer",
+  "business_value": "Enables personalized recommendations, streamlined checkout, and better user engagement through customized preferences.",
+  "dependencies": ["US-001", "US-002"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-003-1",
+      "description": "User can view their profile",
+      "given": "User is logged in",
+      "when": "User navigates to profile page",
+      "then": "User sees all their profile information"
+    },
+    {
+      "id": "AC-003-2",
+      "description": "User can update basic information",
+      "given": "User is on profile page",
+      "when": "User updates name, phone, or date of birth and saves",
+      "then": "Changes are saved and confirmation message is shown"
+    },
+    {
+      "id": "AC-003-3",
+      "description": "User can upload profile picture",
+      "given": "User is on profile page",
+      "when": "User uploads a valid image file (JPG, PNG)",
+      "then": "Profile picture is updated and displayed"
+    },
+    {
+      "id": "AC-003-4",
+      "description": "User can add/edit delivery address",
+      "given": "User is on profile page",
+      "when": "User enters street, city, state, zip code, and delivery instructions",
+      "then": "Address is saved for future orders"
+    },
+    {
+      "id": "AC-003-5",
+      "description": "User can add payment method",
+      "given": "User is on profile page",
+      "when": "User adds credit/debit card or digital wallet",
+      "then": "Payment method is securely stored"
+    },
+    {
+      "id": "AC-003-6",
+      "description": "User can set dietary preferences",
+      "given": "User is on profile page",
+      "when": "User selects dietary preferences (Vegetarian, Vegan, Gluten-Free, etc.)",
+      "then": "Preferences are saved and used for recommendations"
+    },
+    {
+      "id": "AC-003-7",
+      "description": "User can set communication preferences",
+      "given": "User is on profile page",
+      "when": "User toggles Email, SMS, Push Notification preferences",
+      "then": "Communication preferences are saved"
+    }
+  ],
+  "technical_notes": [
+    "Store payment information using tokenization (PCI DSS compliant)",
+    "Image uploads should be validated for type and size (max 5MB)",
+    "Store images in cloud storage (S3 or similar)",
+    "Encrypt sensitive personal data at rest",
+    "Implement input validation for all fields"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/users/profile",
+      "description": "Get current user profile"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/users/profile",
+      "description": "Update user profile"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/profile/avatar",
+      "description": "Upload profile picture"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/addresses",
+      "description": "Add new address"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/users/addresses/{id}",
+      "description": "Update address"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/addresses/{id}",
+      "description": "Delete address"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/payment-methods",
+      "description": "Add payment method"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/payment-methods/{id}",
+      "description": "Remove payment method"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/users/preferences",
+      "description": "Update user preferences"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-003-1",
+      "type": "positive",
+      "title": "User can view profile information",
+      "preconditions": ["User is logged in with complete profile"],
+      "steps": [
+        "Navigate to profile page"
+      ],
+      "expected_result": "All profile information is displayed correctly",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-2",
+      "type": "positive",
+      "title": "User can update personal information",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Update full name to 'Jane Doe'",
+        "Click 'Save' button"
+      ],
+      "expected_result": "Name is updated, success message is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-3",
+      "type": "positive",
+      "title": "User can upload profile picture",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Click upload picture button",
+        "Select valid JPG image under 5MB",
+        "Confirm upload"
+      ],
+      "expected_result": "Profile picture is updated and displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-4",
+      "type": "negative",
+      "title": "Profile picture upload fails with invalid file type",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Attempt to upload a PDF file as profile picture"
+      ],
+      "expected_result": "Error message about invalid file type is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-5",
+      "type": "positive",
+      "title": "User can add delivery address",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Click 'Add Address'",
+        "Enter: Street: '123 Main St', City: 'Austin', State: 'TX', Zip: '78701'",
+        "Add delivery instructions: 'Leave at door'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Address is saved and displayed in address list",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-6",
+      "type": "negative",
+      "title": "Address validation for incomplete data",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Click 'Add Address'",
+        "Leave required fields empty",
+        "Click 'Save'"
+      ],
+      "expected_result": "Validation errors are displayed for required fields",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-7",
+      "type": "positive",
+      "title": "User can add payment method",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Click 'Add Payment Method'",
+        "Select 'Credit Card'",
+        "Enter card details",
+        "Click 'Save'"
+      ],
+      "expected_result": "Payment method is saved (tokenized), last 4 digits displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-8",
+      "type": "positive",
+      "title": "User can set dietary preferences",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Select 'Vegetarian' and 'Gluten-Free' preferences",
+        "Click 'Save'"
+      ],
+      "expected_result": "Preferences are saved and applied to recommendations",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-9",
+      "type": "positive",
+      "title": "User can update communication preferences",
+      "preconditions": ["User is logged in"],
+      "steps": [
+        "Navigate to profile page",
+        "Toggle off SMS notifications",
+        "Toggle on Push notifications",
+        "Click 'Save'"
+      ],
+      "expected_result": "Communication preferences are updated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-003-10",
+      "type": "security",
+      "title": "Payment information is stored securely",
+      "preconditions": ["User has added a payment method"],
+      "steps": [
+        "Check database storage of payment information"
+      ],
+      "expected_result": "Only tokenized payment info is stored, no raw card numbers",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

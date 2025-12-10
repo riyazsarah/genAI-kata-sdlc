@@ -1,0 +1,172 @@
+{
+  "id": "US-016",
+  "title": "Detailed Product Descriptions",
+  "epic": "Product Information",
+  "priority": "Nice to Have",
+  "iteration": 3,
+  "status": "pending",
+  "description": "As a consumer, I want to view detailed product information including nutritional content, origin, and farming methods so that I can make informed and health-conscious purchasing decisions.",
+  "user_role": "Consumer",
+  "business_value": "Differentiates the marketplace by providing transparency, building consumer trust and loyalty.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-016-1",
+      "description": "Product page shows nutritional information",
+      "given": "Consumer views a product with nutritional data",
+      "when": "Consumer scrolls to details section",
+      "then": "Nutritional facts (calories, vitamins, etc.) are displayed"
+    },
+    {
+      "id": "AC-016-2",
+      "description": "Product page shows origin information",
+      "given": "Consumer views a product",
+      "when": "Consumer views details",
+      "then": "Farm origin, location, and distance from consumer is shown"
+    },
+    {
+      "id": "AC-016-3",
+      "description": "Product page shows farming methods",
+      "given": "Consumer views a product",
+      "when": "Consumer views details",
+      "then": "Farming practices (Organic, Sustainable, etc.) are displayed"
+    },
+    {
+      "id": "AC-016-4",
+      "description": "Farmer can add nutritional information",
+      "given": "Farmer is editing a product",
+      "when": "Farmer enters nutritional data",
+      "then": "Data is saved and displayed on product page"
+    },
+    {
+      "id": "AC-016-5",
+      "description": "Farmer can add detailed origin story",
+      "given": "Farmer is editing a product",
+      "when": "Farmer enters origin/story text",
+      "then": "Text is saved and displayed on product page"
+    },
+    {
+      "id": "AC-016-6",
+      "description": "Farming certifications are displayed",
+      "given": "Farmer has certifications (USDA Organic, etc.)",
+      "when": "Consumer views product",
+      "then": "Certification badges are displayed"
+    }
+  ],
+  "technical_notes": [
+    "Use structured data for nutritional information (consider USDA database integration)",
+    "Support rich text for origin stories",
+    "Allow file upload for certification documents",
+    "Consider future AI integration for auto-generating descriptions"
+  ],
+  "api_endpoints": [
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/nutrition",
+      "description": "Update product nutritional info"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/origin",
+      "description": "Update product origin story"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/certifications",
+      "description": "Add farmer certification"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/{id}/details",
+      "description": "Get full product details"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-016-1",
+      "type": "positive",
+      "title": "Nutritional information displayed",
+      "preconditions": ["Product has nutritional data"],
+      "steps": [
+        "Navigate to product page",
+        "View details section"
+      ],
+      "expected_result": "Nutritional facts are displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-2",
+      "type": "positive",
+      "title": "Origin information displayed",
+      "preconditions": ["Product has origin data"],
+      "steps": [
+        "Navigate to product page"
+      ],
+      "expected_result": "Farm name, location, and distance shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-3",
+      "type": "positive",
+      "title": "Farming methods displayed",
+      "preconditions": ["Farmer has set farming practices"],
+      "steps": [
+        "Navigate to product page"
+      ],
+      "expected_result": "Farming practices (e.g., 'Organic') shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-4",
+      "type": "positive",
+      "title": "Farmer adds nutritional information",
+      "preconditions": ["Farmer is editing product"],
+      "steps": [
+        "Navigate to product edit",
+        "Click 'Add Nutrition Info'",
+        "Enter calories, vitamins, etc.",
+        "Save"
+      ],
+      "expected_result": "Nutritional data saved and displayed to consumers",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-5",
+      "type": "positive",
+      "title": "Farmer adds origin story",
+      "preconditions": ["Farmer is editing product"],
+      "steps": [
+        "Navigate to product edit",
+        "Enter origin story text",
+        "Save"
+      ],
+      "expected_result": "Story saved and displayed on product page",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-6",
+      "type": "positive",
+      "title": "Certification badges displayed",
+      "preconditions": ["Farmer has USDA Organic certification"],
+      "steps": [
+        "Navigate to product from certified farmer"
+      ],
+      "expected_result": "USDA Organic badge is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-016-7",
+      "type": "edge",
+      "title": "Product without detailed info shows basic info",
+      "preconditions": ["Product has no nutritional/origin data"],
+      "steps": [
+        "Navigate to product page"
+      ],
+      "expected_result": "Basic product info shown, no errors",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

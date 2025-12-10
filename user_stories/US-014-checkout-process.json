@@ -1,0 +1,249 @@
+{
+  "id": "US-014",
+  "title": "Checkout Process",
+  "epic": "Shopping Cart and Checkout",
+  "priority": "Must Have",
+  "iteration": 3,
+  "status": "pending",
+  "description": "As a consumer, I want to complete my purchase through a checkout process with delivery and payment options so that I can order products for delivery.",
+  "user_role": "Consumer",
+  "business_value": "Final step in the purchase funnel, directly converting cart items to revenue.",
+  "dependencies": ["US-013", "US-003"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-014-1",
+      "description": "Consumer can proceed to checkout",
+      "given": "Consumer has items in cart",
+      "when": "Consumer clicks 'Checkout'",
+      "then": "Checkout page is displayed with order summary"
+    },
+    {
+      "id": "AC-014-2",
+      "description": "Consumer can select or add delivery address",
+      "given": "Consumer is on checkout",
+      "when": "Consumer selects saved address or adds new one",
+      "then": "Address is set for delivery"
+    },
+    {
+      "id": "AC-014-3",
+      "description": "Consumer can add delivery instructions",
+      "given": "Consumer is on checkout",
+      "when": "Consumer enters delivery instructions",
+      "then": "Instructions are saved with order"
+    },
+    {
+      "id": "AC-014-4",
+      "description": "Consumer can select payment method",
+      "given": "Consumer is on checkout",
+      "when": "Consumer selects saved payment or adds new one",
+      "then": "Payment method is set for order"
+    },
+    {
+      "id": "AC-014-5",
+      "description": "Order summary displays all details",
+      "given": "Consumer is on checkout",
+      "when": "Consumer reviews order",
+      "then": "Items, subtotal, delivery fee, tax, and total are displayed"
+    },
+    {
+      "id": "AC-014-6",
+      "description": "Consumer can complete payment",
+      "given": "Consumer has completed all checkout steps",
+      "when": "Consumer clicks 'Place Order'",
+      "then": "Payment is processed and order is created"
+    },
+    {
+      "id": "AC-014-7",
+      "description": "Order confirmation is displayed",
+      "given": "Payment is successful",
+      "when": "Order is placed",
+      "then": "Confirmation page shows order number and details"
+    },
+    {
+      "id": "AC-014-8",
+      "description": "Confirmation email is sent",
+      "given": "Order is placed successfully",
+      "when": "Order is confirmed",
+      "then": "Consumer receives email with order details"
+    },
+    {
+      "id": "AC-014-9",
+      "description": "Stock is validated before order completion",
+      "given": "Consumer is completing checkout",
+      "when": "Stock has changed since cart was created",
+      "then": "Consumer is notified of stock issues before payment"
+    }
+  ],
+  "technical_notes": [
+    "Integrate with payment gateway (Stripe, PayPal, etc.)",
+    "Use transactions to ensure data consistency",
+    "Validate stock before processing payment",
+    "Calculate delivery fee based on location and weight",
+    "PCI DSS compliance for payment processing",
+    "Send order to farmer(s) for fulfillment"
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v1/orders/checkout",
+      "description": "Initialize checkout session"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/orders/checkout/address",
+      "description": "Set delivery address"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/orders/checkout/payment",
+      "description": "Set payment method"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/orders",
+      "description": "Create order and process payment"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders/{id}/confirmation",
+      "description": "Get order confirmation details"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-014-1",
+      "type": "positive",
+      "title": "Complete checkout with saved address and payment",
+      "preconditions": ["User has items in cart", "User has saved address and payment"],
+      "steps": [
+        "Click 'Checkout' from cart",
+        "Select saved delivery address",
+        "Select saved payment method",
+        "Review order summary",
+        "Click 'Place Order'"
+      ],
+      "expected_result": "Order placed, confirmation page shown, email sent",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-2",
+      "type": "positive",
+      "title": "Checkout with new address",
+      "preconditions": ["User has items in cart"],
+      "steps": [
+        "Click 'Checkout'",
+        "Click 'Add New Address'",
+        "Enter address details",
+        "Complete checkout"
+      ],
+      "expected_result": "Order placed with new address",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-3",
+      "type": "positive",
+      "title": "Add delivery instructions",
+      "preconditions": ["User is at checkout"],
+      "steps": [
+        "Enter delivery instructions: 'Leave at back door'",
+        "Complete checkout"
+      ],
+      "expected_result": "Order includes delivery instructions",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-4",
+      "type": "positive",
+      "title": "Checkout with new payment method",
+      "preconditions": ["User is at checkout"],
+      "steps": [
+        "Click 'Add Payment Method'",
+        "Enter card details",
+        "Complete checkout"
+      ],
+      "expected_result": "Order placed with new payment method",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-5",
+      "type": "positive",
+      "title": "Order summary displays correctly",
+      "preconditions": ["User is at checkout with $50 in items"],
+      "steps": [
+        "Review order summary"
+      ],
+      "expected_result": "Shows items ($50), delivery fee, tax, and total",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-6",
+      "type": "negative",
+      "title": "Checkout fails with invalid payment",
+      "preconditions": ["User is at checkout"],
+      "steps": [
+        "Enter invalid card number",
+        "Click 'Place Order'"
+      ],
+      "expected_result": "Payment error message is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-7",
+      "type": "negative",
+      "title": "Checkout blocked when item out of stock",
+      "preconditions": ["User has item in cart that became out of stock"],
+      "steps": [
+        "Click 'Place Order'"
+      ],
+      "expected_result": "Error message about stock, user asked to update cart",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-8",
+      "type": "positive",
+      "title": "Order confirmation page displayed",
+      "preconditions": ["Order placed successfully"],
+      "steps": [
+        "View confirmation page"
+      ],
+      "expected_result": "Order number, items, total, and delivery estimate shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-9",
+      "type": "integration",
+      "title": "Confirmation email received",
+      "preconditions": ["Order placed successfully"],
+      "steps": [
+        "Check email inbox"
+      ],
+      "expected_result": "Email received with order details",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-10",
+      "type": "integration",
+      "title": "Farmer receives order notification",
+      "preconditions": ["Order placed successfully"],
+      "steps": [
+        "Log in as farmer"
+      ],
+      "expected_result": "New order appears in farmer's order list",
+      "status": "pending"
+    },
+    {
+      "id": "TC-014-11",
+      "type": "security",
+      "title": "Payment data is transmitted securely",
+      "preconditions": ["User is entering payment info"],
+      "steps": [
+        "Monitor network traffic"
+      ],
+      "expected_result": "All payment data transmitted over HTTPS",
+      "status": "pending"
+    }
+  ],
+  "story_points": 13,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

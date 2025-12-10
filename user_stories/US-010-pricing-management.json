@@ -1,0 +1,216 @@
+{
+  "id": "US-010",
+  "title": "Product Pricing Management",
+  "epic": "Availability and Pricing Management",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a farmer, I want to manage product pricing including regular prices, discounts, and bulk pricing so that I can offer competitive pricing and promotions to consumers.",
+  "user_role": "Farmer",
+  "business_value": "Enables flexible pricing strategies, increases sales through promotions, and helps farmers analyze pricing effectiveness.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-010-1",
+      "description": "Farmer can set and update product price",
+      "given": "Farmer is on product management",
+      "when": "Farmer enters or updates price",
+      "then": "New price is saved and displayed"
+    },
+    {
+      "id": "AC-010-2",
+      "description": "Farmer can set discount pricing",
+      "given": "Farmer is on product pricing",
+      "when": "Farmer applies percentage or fixed discount",
+      "then": "Discounted price is displayed to consumers with original price crossed out"
+    },
+    {
+      "id": "AC-010-3",
+      "description": "Farmer can set bulk pricing",
+      "given": "Farmer is on product pricing",
+      "when": "Farmer sets bulk price (e.g., $4/lb for 5+ lbs)",
+      "then": "Bulk pricing is applied when quantity threshold is met"
+    },
+    {
+      "id": "AC-010-4",
+      "description": "Price history is tracked",
+      "given": "Farmer views product pricing",
+      "when": "Farmer accesses price history",
+      "then": "Historical price changes are displayed with dates"
+    },
+    {
+      "id": "AC-010-5",
+      "description": "Price changes are communicated to customers",
+      "given": "Product price is updated",
+      "when": "Price decreases or significant increase occurs",
+      "then": "Customers with product in wishlist/cart are notified"
+    }
+  ],
+  "technical_notes": [
+    "Store price history in separate table for analytics",
+    "Support multiple currencies if needed (future enhancement)",
+    "Bulk pricing should support tiered pricing structures",
+    "Validate prices are positive numbers with max 2 decimal places"
+  ],
+  "api_endpoints": [
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/price",
+      "description": "Update product price"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/products/{id}/discount",
+      "description": "Apply discount to product"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/farmers/products/{id}/discount",
+      "description": "Remove discount from product"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/bulk-pricing",
+      "description": "Set bulk pricing rules"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/products/{id}/price-history",
+      "description": "Get price history for product"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-010-1",
+      "type": "positive",
+      "title": "Farmer updates product price",
+      "preconditions": ["Product exists with price $5.00"],
+      "steps": [
+        "Navigate to product pricing",
+        "Change price to $5.50",
+        "Save changes"
+      ],
+      "expected_result": "Price is updated to $5.50, change logged in history",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-2",
+      "type": "negative",
+      "title": "Price update fails with invalid value",
+      "preconditions": ["Product exists"],
+      "steps": [
+        "Navigate to product pricing",
+        "Enter price: 'abc'",
+        "Attempt to save"
+      ],
+      "expected_result": "Validation error for invalid price format",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-3",
+      "type": "negative",
+      "title": "Price update fails with negative value",
+      "preconditions": ["Product exists"],
+      "steps": [
+        "Navigate to product pricing",
+        "Enter price: '-5.00'",
+        "Attempt to save"
+      ],
+      "expected_result": "Validation error 'Price must be greater than 0'",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-4",
+      "type": "positive",
+      "title": "Farmer applies percentage discount",
+      "preconditions": ["Product exists with price $10.00"],
+      "steps": [
+        "Navigate to product pricing",
+        "Click 'Add Discount'",
+        "Select '20% off'",
+        "Save"
+      ],
+      "expected_result": "Product shows $8.00 with $10.00 crossed out",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-5",
+      "type": "positive",
+      "title": "Farmer applies fixed discount",
+      "preconditions": ["Product exists with price $10.00"],
+      "steps": [
+        "Navigate to product pricing",
+        "Click 'Add Discount'",
+        "Select '$2 off'",
+        "Save"
+      ],
+      "expected_result": "Product shows $8.00 with $10.00 crossed out",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-6",
+      "type": "positive",
+      "title": "Farmer removes discount",
+      "preconditions": ["Product has active discount"],
+      "steps": [
+        "Navigate to product pricing",
+        "Click 'Remove Discount'",
+        "Confirm"
+      ],
+      "expected_result": "Discount is removed, original price displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-7",
+      "type": "positive",
+      "title": "Farmer sets bulk pricing",
+      "preconditions": ["Product exists with price $5.00/lb"],
+      "steps": [
+        "Navigate to product pricing",
+        "Click 'Add Bulk Pricing'",
+        "Set: 5+ lbs = $4.50/lb, 10+ lbs = $4.00/lb",
+        "Save"
+      ],
+      "expected_result": "Bulk pricing tiers are saved",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-8",
+      "type": "integration",
+      "title": "Bulk pricing applied at checkout",
+      "preconditions": ["Product has bulk pricing: 5+ lbs = $4.50/lb"],
+      "steps": [
+        "Consumer adds 7 lbs to cart",
+        "Proceed to checkout"
+      ],
+      "expected_result": "Price calculated as 7 x $4.50 = $31.50",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-9",
+      "type": "positive",
+      "title": "Farmer views price history",
+      "preconditions": ["Product has had multiple price changes"],
+      "steps": [
+        "Navigate to product pricing",
+        "Click 'View Price History'"
+      ],
+      "expected_result": "List of price changes with dates is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-010-10",
+      "type": "integration",
+      "title": "Consumer notified of price drop",
+      "preconditions": ["Consumer has product in wishlist"],
+      "steps": [
+        "Farmer reduces product price"
+      ],
+      "expected_result": "Consumer receives notification about price drop",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

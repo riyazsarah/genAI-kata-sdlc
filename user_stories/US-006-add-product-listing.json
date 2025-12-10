@@ -1,0 +1,204 @@
+{
+  "id": "US-006",
+  "title": "Add Product Listing",
+  "epic": "Product Listing Management",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a farmer, I want to add new products to my listing so that consumers can discover and purchase my farm products.",
+  "user_role": "Farmer",
+  "business_value": "Core functionality enabling farmers to showcase their products, directly driving marketplace revenue.",
+  "dependencies": ["US-004", "US-005"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-006-1",
+      "description": "Farmer can access product management dashboard",
+      "given": "Farmer is logged in",
+      "when": "Farmer navigates to 'My Products' section",
+      "then": "Product management dashboard is displayed with 'Add Product' button"
+    },
+    {
+      "id": "AC-006-2",
+      "description": "Farmer can add product with required details",
+      "given": "Farmer is on add product form",
+      "when": "Farmer enters product name, category, description, price, and quantity",
+      "then": "Product is saved and listed"
+    },
+    {
+      "id": "AC-006-3",
+      "description": "Farmer can set product seasonality",
+      "given": "Farmer is adding a product",
+      "when": "Farmer selects seasonal availability (Spring, Summer, Fall, Winter, Year-round)",
+      "then": "Seasonality is saved and displayed on product"
+    },
+    {
+      "id": "AC-006-4",
+      "description": "Farmer can upload multiple product images",
+      "given": "Farmer is adding a product",
+      "when": "Farmer uploads up to 5 images",
+      "then": "All images are saved and displayed in product gallery"
+    },
+    {
+      "id": "AC-006-5",
+      "description": "Required fields are validated",
+      "given": "Farmer is on add product form",
+      "when": "Farmer attempts to save without required fields",
+      "then": "Validation errors are displayed for missing fields"
+    },
+    {
+      "id": "AC-006-6",
+      "description": "Product appears in farmer's product list after creation",
+      "given": "Farmer has created a product",
+      "when": "Farmer views 'My Products'",
+      "then": "New product is displayed in the list"
+    }
+  ],
+  "technical_notes": [
+    "Implement form validation on both frontend and backend",
+    "Support image formats: JPG, PNG, WebP",
+    "Optimize images on upload (resize, compress)",
+    "Product categories should be predefined (Vegetables, Fruits, Dairy, Meat, etc.)",
+    "Index products for search functionality"
+  ],
+  "data_model": {
+    "product": {
+      "id": "UUID",
+      "farmer_id": "UUID (FK)",
+      "name": "string (required, max 100 chars)",
+      "category": "enum (Vegetables, Fruits, Dairy, Meat, Eggs, Honey, Herbs, Grains, Other)",
+      "description": "text (required, max 2000 chars)",
+      "price": "decimal (required, > 0)",
+      "unit": "enum (lb, kg, each, dozen, bunch)",
+      "quantity": "integer (required, >= 0)",
+      "seasonality": "array of enum (Spring, Summer, Fall, Winter, Year-round)",
+      "images": "array of URLs",
+      "status": "enum (active, inactive, archived)",
+      "created_at": "timestamp",
+      "updated_at": "timestamp"
+    }
+  },
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/products",
+      "description": "Get all products for logged-in farmer"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/products",
+      "description": "Create new product"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/products/{id}/images",
+      "description": "Upload product images"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/categories",
+      "description": "Get product categories"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-006-1",
+      "type": "positive",
+      "title": "Farmer successfully adds a product",
+      "preconditions": ["Farmer is logged in with complete profile"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Add Product'",
+        "Enter name: 'Organic Tomatoes'",
+        "Select category: 'Vegetables'",
+        "Enter description: 'Fresh organic tomatoes grown without pesticides'",
+        "Enter price: '4.99'",
+        "Select unit: 'lb'",
+        "Enter quantity: '100'",
+        "Select seasonality: 'Summer'",
+        "Upload 2 product images",
+        "Click 'Save Product'"
+      ],
+      "expected_result": "Product is created, confirmation shown, product appears in list",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-2",
+      "type": "negative",
+      "title": "Product creation fails without required fields",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to 'Add Product'",
+        "Leave name empty",
+        "Click 'Save Product'"
+      ],
+      "expected_result": "Validation error 'Product name is required' is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-3",
+      "type": "negative",
+      "title": "Product creation fails with invalid price",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to 'Add Product'",
+        "Enter price: '-5'",
+        "Click 'Save Product'"
+      ],
+      "expected_result": "Validation error 'Price must be greater than 0' is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-4",
+      "type": "positive",
+      "title": "Multiple images can be uploaded",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to 'Add Product'",
+        "Upload 5 product images",
+        "Save product"
+      ],
+      "expected_result": "All 5 images are saved and displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-5",
+      "type": "negative",
+      "title": "Image upload fails with invalid file type",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to 'Add Product'",
+        "Attempt to upload a PDF file"
+      ],
+      "expected_result": "Error message about invalid file type is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-6",
+      "type": "positive",
+      "title": "Product appears in farmer's list after creation",
+      "preconditions": ["Farmer has created a product"],
+      "steps": [
+        "Navigate to 'My Products'"
+      ],
+      "expected_result": "Newly created product is visible in the list",
+      "status": "pending"
+    },
+    {
+      "id": "TC-006-7",
+      "type": "boundary",
+      "title": "Product name at maximum length",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to 'Add Product'",
+        "Enter product name with exactly 100 characters",
+        "Fill other required fields",
+        "Save product"
+      ],
+      "expected_result": "Product is saved successfully",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

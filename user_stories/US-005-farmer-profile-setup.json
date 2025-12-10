@@ -1,0 +1,238 @@
+{
+  "id": "US-005",
+  "title": "Farmer Profile and Farm Setup",
+  "epic": "Farmer Profile Management",
+  "priority": "Must Have",
+  "iteration": 1,
+  "status": "pending",
+  "description": "As a registered farmer, I want to complete my farm profile with farm details, location, farming practices, and upload pictures/videos so that consumers can learn about my farm and build trust.",
+  "user_role": "Farmer",
+  "business_value": "Complete farm profiles increase consumer trust and transparency, leading to higher sales and customer loyalty.",
+  "dependencies": ["US-004"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-005-1",
+      "description": "Farmer is prompted to complete profile after verification",
+      "given": "Farmer has verified their email",
+      "when": "Farmer logs in for the first time",
+      "then": "Farmer is redirected to profile setup wizard"
+    },
+    {
+      "id": "AC-005-2",
+      "description": "Farmer can enter farm basic information",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer enters farm name and farm description",
+      "then": "Information is saved"
+    },
+    {
+      "id": "AC-005-3",
+      "description": "Farmer can add farm address",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer enters street, city, state, and zip code",
+      "then": "Farm location is saved and displayed on map"
+    },
+    {
+      "id": "AC-005-4",
+      "description": "Farmer can select farming practices",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer selects practices (Organic, Sustainable, Conventional, etc.)",
+      "then": "Farming practices are saved and displayed on profile"
+    },
+    {
+      "id": "AC-005-5",
+      "description": "Farmer can upload farm pictures",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer uploads valid image files",
+      "then": "Pictures are saved and displayed in farm gallery"
+    },
+    {
+      "id": "AC-005-6",
+      "description": "Farmer can upload farm videos",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer uploads valid video file or provides video URL",
+      "then": "Video is saved and displayed on farm profile"
+    },
+    {
+      "id": "AC-005-7",
+      "description": "Farmer can add bank account for payments",
+      "given": "Farmer is on profile setup",
+      "when": "Farmer enters bank account details",
+      "then": "Payment information is securely stored"
+    },
+    {
+      "id": "AC-005-8",
+      "description": "Farmer can edit profile after initial setup",
+      "given": "Farmer has completed initial setup",
+      "when": "Farmer navigates to settings and updates any field",
+      "then": "Changes are saved and reflected on profile"
+    }
+  ],
+  "technical_notes": [
+    "Use cloud storage for images and videos (S3 or similar)",
+    "Implement image compression and optimization",
+    "Video uploads should support MP4, max 100MB or provide YouTube/Vimeo URL option",
+    "Store bank details with encryption (PCI/financial compliance)",
+    "Geocode farm address for map display",
+    "Support multiple images (gallery feature)"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/profile",
+      "description": "Get farmer profile"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/profile",
+      "description": "Update farmer profile"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/farm",
+      "description": "Update farm details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/farm/images",
+      "description": "Upload farm images"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/farmers/farm/images/{id}",
+      "description": "Delete farm image"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/farm/videos",
+      "description": "Add farm video"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/bank-account",
+      "description": "Add or update bank account details"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-005-1",
+      "type": "positive",
+      "title": "Farmer completes basic farm profile",
+      "preconditions": ["Farmer is logged in and verified"],
+      "steps": [
+        "Navigate to profile setup",
+        "Enter farm name: 'Green Valley Farm'",
+        "Enter description: 'Family-owned organic farm since 1990'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Farm basic info is saved",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-2",
+      "type": "positive",
+      "title": "Farmer adds farm address",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to farm profile",
+        "Enter: Street '456 Farm Road', City 'Austin', State 'TX', Zip '78702'",
+        "Click 'Save'"
+      ],
+      "expected_result": "Address is saved, location shown on map",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-3",
+      "type": "positive",
+      "title": "Farmer selects farming practices",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to farm profile",
+        "Select 'Organic' and 'Sustainable' practices",
+        "Click 'Save'"
+      ],
+      "expected_result": "Farming practices are saved and displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-4",
+      "type": "positive",
+      "title": "Farmer uploads farm pictures",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to farm profile",
+        "Click 'Upload Pictures'",
+        "Select 3 JPG images",
+        "Click 'Upload'"
+      ],
+      "expected_result": "All images are uploaded and displayed in gallery",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-5",
+      "type": "negative",
+      "title": "Image upload fails with oversized file",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to farm profile",
+        "Attempt to upload image larger than 10MB"
+      ],
+      "expected_result": "Error message about file size limit is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-6",
+      "type": "positive",
+      "title": "Farmer adds video URL",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to farm profile",
+        "Click 'Add Video'",
+        "Enter YouTube URL",
+        "Click 'Save'"
+      ],
+      "expected_result": "Video is embedded and displayed on profile",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-7",
+      "type": "positive",
+      "title": "Farmer adds bank account",
+      "preconditions": ["Farmer is logged in"],
+      "steps": [
+        "Navigate to payment settings",
+        "Enter bank account number and routing number",
+        "Enter account holder name",
+        "Click 'Save'"
+      ],
+      "expected_result": "Bank account is saved securely",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-8",
+      "type": "positive",
+      "title": "Farmer can edit existing profile",
+      "preconditions": ["Farmer has completed profile setup"],
+      "steps": [
+        "Navigate to farm profile",
+        "Update farm description",
+        "Click 'Save'"
+      ],
+      "expected_result": "Changes are saved and immediately visible",
+      "status": "pending"
+    },
+    {
+      "id": "TC-005-9",
+      "type": "security",
+      "title": "Bank account information is encrypted",
+      "preconditions": ["Farmer has added bank account"],
+      "steps": [
+        "Check database storage"
+      ],
+      "expected_result": "Bank details are encrypted at rest",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

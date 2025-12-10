@@ -1,0 +1,225 @@
+{
+  "id": "US-012",
+  "title": "Product Search and Filtering",
+  "epic": "Product Browsing and Search",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a consumer, I want to search and filter products by various criteria (category, seasonality, location, price, etc.) so that I can quickly find specific products that meet my needs.",
+  "user_role": "Consumer",
+  "business_value": "Improves user experience and conversion by helping consumers find desired products quickly.",
+  "dependencies": ["US-011"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-012-1",
+      "description": "Search bar with autocomplete",
+      "given": "Consumer is on any page",
+      "when": "Consumer types in search bar",
+      "then": "Autocomplete suggestions appear based on product names"
+    },
+    {
+      "id": "AC-012-2",
+      "description": "Search returns relevant results",
+      "given": "Consumer has entered search term",
+      "when": "Consumer submits search",
+      "then": "Products matching the search term are displayed"
+    },
+    {
+      "id": "AC-012-3",
+      "description": "Filter by category",
+      "given": "Consumer is viewing search results or catalog",
+      "when": "Consumer selects a category filter",
+      "then": "Only products in selected category are shown"
+    },
+    {
+      "id": "AC-012-4",
+      "description": "Filter by seasonality",
+      "given": "Consumer is viewing products",
+      "when": "Consumer selects seasonality filter (e.g., 'Summer')",
+      "then": "Only seasonal products are shown"
+    },
+    {
+      "id": "AC-012-5",
+      "description": "Filter by farm location",
+      "given": "Consumer is viewing products",
+      "when": "Consumer selects location filter or radius",
+      "then": "Only products from farms in selected area are shown"
+    },
+    {
+      "id": "AC-012-6",
+      "description": "Filter by price range",
+      "given": "Consumer is viewing products",
+      "when": "Consumer sets min and max price",
+      "then": "Only products within price range are shown"
+    },
+    {
+      "id": "AC-012-7",
+      "description": "Sort options available",
+      "given": "Consumer is viewing products",
+      "when": "Consumer selects sort option",
+      "then": "Products are sorted by price, popularity, or rating"
+    },
+    {
+      "id": "AC-012-8",
+      "description": "Multiple filters can be combined",
+      "given": "Consumer is viewing products",
+      "when": "Consumer applies multiple filters",
+      "then": "Products matching all filters are shown"
+    },
+    {
+      "id": "AC-012-9",
+      "description": "Filters can be cleared",
+      "given": "Consumer has applied filters",
+      "when": "Consumer clicks 'Clear Filters'",
+      "then": "All filters are removed and full catalog is shown"
+    }
+  ],
+  "technical_notes": [
+    "Implement full-text search with relevance ranking",
+    "Index products for fast search",
+    "Use geolocation for location-based filtering",
+    "Debounce autocomplete requests",
+    "URL should reflect applied filters for shareability"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/products/search",
+      "description": "Search products with query and filters"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/autocomplete",
+      "description": "Get autocomplete suggestions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products?category=X&season=Y&location=Z&minPrice=A&maxPrice=B&sort=C",
+      "description": "Get filtered products"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-012-1",
+      "type": "positive",
+      "title": "Search returns matching products",
+      "preconditions": ["Products with 'tomato' in name exist"],
+      "steps": [
+        "Enter 'tomato' in search bar",
+        "Press Enter or click Search"
+      ],
+      "expected_result": "Products with 'tomato' are displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-2",
+      "type": "positive",
+      "title": "Autocomplete suggestions appear",
+      "preconditions": ["Products exist"],
+      "steps": [
+        "Type 'org' in search bar"
+      ],
+      "expected_result": "Suggestions like 'Organic Tomatoes', 'Organic Apples' appear",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-3",
+      "type": "positive",
+      "title": "Filter by category works",
+      "preconditions": ["Products in multiple categories exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Select 'Vegetables' filter"
+      ],
+      "expected_result": "Only vegetable products are shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-4",
+      "type": "positive",
+      "title": "Filter by seasonality works",
+      "preconditions": ["Products with different seasonality exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Select 'Summer' seasonality filter"
+      ],
+      "expected_result": "Only summer products are shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-5",
+      "type": "positive",
+      "title": "Filter by location works",
+      "preconditions": ["Products from different locations exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Enter location or select 'Within 25 miles'"
+      ],
+      "expected_result": "Only local products are shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-6",
+      "type": "positive",
+      "title": "Filter by price range works",
+      "preconditions": ["Products with various prices exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Set min price: $5, max price: $15"
+      ],
+      "expected_result": "Only products between $5-$15 are shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-7",
+      "type": "positive",
+      "title": "Sort by price ascending works",
+      "preconditions": ["Products exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Select 'Sort by: Price (Low to High)'"
+      ],
+      "expected_result": "Products are sorted by price ascending",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-8",
+      "type": "positive",
+      "title": "Multiple filters combine correctly",
+      "preconditions": ["Various products exist"],
+      "steps": [
+        "Navigate to catalog",
+        "Select category: 'Vegetables'",
+        "Select season: 'Summer'",
+        "Set max price: $10"
+      ],
+      "expected_result": "Only summer vegetables under $10 are shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-9",
+      "type": "positive",
+      "title": "Clear filters resets view",
+      "preconditions": ["Filters are applied"],
+      "steps": [
+        "Click 'Clear All Filters'"
+      ],
+      "expected_result": "All filters removed, full catalog shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-012-10",
+      "type": "edge",
+      "title": "No results message for empty search",
+      "preconditions": ["No products match search"],
+      "steps": [
+        "Search for 'xyznonexistent123'"
+      ],
+      "expected_result": "'No products found' message with suggestions displayed",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

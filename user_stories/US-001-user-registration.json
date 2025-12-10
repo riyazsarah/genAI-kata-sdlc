@@ -1,0 +1,160 @@
+{
+  "id": "US-001",
+  "title": "User Registration",
+  "epic": "User Profile Management",
+  "priority": "Must Have",
+  "iteration": 1,
+  "status": "pending",
+  "description": "As a new consumer, I want to register an account on the Farm-to-Table Marketplace so that I can access personalized features, place orders, and track my purchases.",
+  "user_role": "Consumer",
+  "business_value": "Enables user acquisition and personalized experience, forming the foundation for all consumer interactions with the platform.",
+  "dependencies": [],
+  "acceptance_criteria": [
+    {
+      "id": "AC-001-1",
+      "description": "User can access the registration page from the homepage",
+      "given": "User is on the homepage",
+      "when": "User clicks on 'Sign Up' button",
+      "then": "User is redirected to the registration form"
+    },
+    {
+      "id": "AC-001-2",
+      "description": "User can register with email and password",
+      "given": "User is on the registration page",
+      "when": "User enters valid full name, email, password, and phone number",
+      "then": "Account is created and verification email is sent"
+    },
+    {
+      "id": "AC-001-3",
+      "description": "Email validation is enforced",
+      "given": "User is on the registration page",
+      "when": "User enters an invalid email format",
+      "then": "Error message 'Please enter a valid email address' is displayed"
+    },
+    {
+      "id": "AC-001-4",
+      "description": "Password strength validation is enforced",
+      "given": "User is on the registration page",
+      "when": "User enters a password less than 8 characters or without required complexity",
+      "then": "Error message indicating password requirements is displayed"
+    },
+    {
+      "id": "AC-001-5",
+      "description": "Duplicate email prevention",
+      "given": "User is on the registration page",
+      "when": "User enters an email that already exists in the system",
+      "then": "Error message 'An account with this email already exists' is displayed"
+    },
+    {
+      "id": "AC-001-6",
+      "description": "Email verification is required",
+      "given": "User has submitted the registration form",
+      "when": "User clicks verification link in email",
+      "then": "Account is verified and user can log in"
+    }
+  ],
+  "technical_notes": [
+    "Use secure password hashing (bcrypt or similar)",
+    "Implement rate limiting on registration endpoint",
+    "Store user data with proper encryption",
+    "Email verification link should expire after 24 hours"
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "description": "Register a new user account"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/verify-email",
+      "description": "Verify user email with token"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-001-1",
+      "type": "positive",
+      "title": "Successful user registration with valid data",
+      "preconditions": ["Registration page is accessible", "Email is not already registered"],
+      "steps": [
+        "Navigate to registration page",
+        "Enter full name: 'John Doe'",
+        "Enter email: 'john.doe@example.com'",
+        "Enter password: 'SecurePass123!'",
+        "Enter phone: '+1234567890'",
+        "Click 'Register' button"
+      ],
+      "expected_result": "User account is created, verification email is sent, success message is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-001-2",
+      "type": "negative",
+      "title": "Registration fails with invalid email format",
+      "preconditions": ["Registration page is accessible"],
+      "steps": [
+        "Navigate to registration page",
+        "Enter email: 'invalid-email'",
+        "Attempt to submit form"
+      ],
+      "expected_result": "Error message 'Please enter a valid email address' is displayed, form is not submitted",
+      "status": "pending"
+    },
+    {
+      "id": "TC-001-3",
+      "type": "negative",
+      "title": "Registration fails with weak password",
+      "preconditions": ["Registration page is accessible"],
+      "steps": [
+        "Navigate to registration page",
+        "Enter password: '123'",
+        "Attempt to submit form"
+      ],
+      "expected_result": "Error message about password requirements is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-001-4",
+      "type": "negative",
+      "title": "Registration fails with duplicate email",
+      "preconditions": ["Email 'existing@example.com' is already registered"],
+      "steps": [
+        "Navigate to registration page",
+        "Enter email: 'existing@example.com'",
+        "Fill other required fields",
+        "Click 'Register' button"
+      ],
+      "expected_result": "Error message 'An account with this email already exists' is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-001-5",
+      "type": "positive",
+      "title": "Email verification link works correctly",
+      "preconditions": ["User has registered but not verified email"],
+      "steps": [
+        "Open verification email",
+        "Click verification link",
+        "Attempt to log in"
+      ],
+      "expected_result": "Account is verified, user can log in successfully",
+      "status": "pending"
+    },
+    {
+      "id": "TC-001-6",
+      "type": "security",
+      "title": "Password is stored securely",
+      "preconditions": ["User has registered"],
+      "steps": [
+        "Check database for user record",
+        "Verify password field"
+      ],
+      "expected_result": "Password is hashed, not stored in plain text",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

@@ -1,0 +1,226 @@
+{
+  "id": "US-015",
+  "title": "Product and Farmer Reviews and Ratings",
+  "epic": "Reviews and Ratings",
+  "priority": "Nice to Have",
+  "iteration": 3,
+  "status": "pending",
+  "description": "As a consumer, I want to rate and review products and farmers so that I can share my experience and help other consumers make informed decisions.",
+  "user_role": "Consumer",
+  "business_value": "Builds trust, encourages quality, and helps consumers make purchase decisions through social proof.",
+  "dependencies": ["US-014"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-015-1",
+      "description": "Consumer can rate a product after purchase",
+      "given": "Consumer has received a product from an order",
+      "when": "Consumer submits a rating (1-5 stars)",
+      "then": "Rating is saved and reflected in product's average"
+    },
+    {
+      "id": "AC-015-2",
+      "description": "Consumer can write a review for a product",
+      "given": "Consumer has purchased a product",
+      "when": "Consumer writes review text and submits",
+      "then": "Review is saved and displayed on product page"
+    },
+    {
+      "id": "AC-015-3",
+      "description": "Consumer can rate a farmer",
+      "given": "Consumer has ordered from a farmer",
+      "when": "Consumer submits farmer rating",
+      "then": "Rating is saved and reflected in farmer's profile"
+    },
+    {
+      "id": "AC-015-4",
+      "description": "Reviews are displayed on product pages",
+      "given": "Product has reviews",
+      "when": "Consumer views product",
+      "then": "Reviews and ratings are visible"
+    },
+    {
+      "id": "AC-015-5",
+      "description": "Reviews are displayed on farmer profiles",
+      "given": "Farmer has reviews",
+      "when": "Consumer views farmer profile",
+      "then": "Reviews and overall rating are visible"
+    },
+    {
+      "id": "AC-015-6",
+      "description": "Farmer can respond to reviews",
+      "given": "Farmer has received a review",
+      "when": "Farmer writes and submits a response",
+      "then": "Response is displayed with the review"
+    },
+    {
+      "id": "AC-015-7",
+      "description": "Consumer can edit their review",
+      "given": "Consumer has written a review",
+      "when": "Consumer edits the review",
+      "then": "Updated review is saved and displayed"
+    },
+    {
+      "id": "AC-015-8",
+      "description": "Consumer can delete their review",
+      "given": "Consumer has written a review",
+      "when": "Consumer deletes the review",
+      "then": "Review is removed from display"
+    }
+  ],
+  "technical_notes": [
+    "Only allow reviews from verified purchasers",
+    "Calculate and cache average ratings",
+    "Implement moderation for inappropriate content",
+    "Consider sentiment analysis for review insights",
+    "Reviews should be indexed for search"
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v1/products/{id}/reviews",
+      "description": "Create product review"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/reviews/{id}",
+      "description": "Update review"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/reviews/{id}",
+      "description": "Delete review"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/{id}/reviews",
+      "description": "Get product reviews"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/farmers/{id}/reviews",
+      "description": "Create farmer review"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/{id}/reviews",
+      "description": "Get farmer reviews"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reviews/{id}/response",
+      "description": "Farmer responds to review"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-015-1",
+      "type": "positive",
+      "title": "Consumer rates a product",
+      "preconditions": ["Consumer has received ordered product"],
+      "steps": [
+        "Navigate to order history",
+        "Click 'Rate Product'",
+        "Select 4 stars",
+        "Submit"
+      ],
+      "expected_result": "Rating saved, product average updated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-2",
+      "type": "positive",
+      "title": "Consumer writes product review",
+      "preconditions": ["Consumer has purchased product"],
+      "steps": [
+        "Navigate to product page",
+        "Click 'Write Review'",
+        "Enter review text: 'Great quality tomatoes!'",
+        "Select 5 stars",
+        "Submit"
+      ],
+      "expected_result": "Review saved and displayed on product page",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-3",
+      "type": "negative",
+      "title": "Cannot review without purchase",
+      "preconditions": ["Consumer has not purchased the product"],
+      "steps": [
+        "Navigate to product page",
+        "Attempt to write review"
+      ],
+      "expected_result": "'Purchase required to review' message shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-4",
+      "type": "positive",
+      "title": "Consumer rates a farmer",
+      "preconditions": ["Consumer has ordered from farmer"],
+      "steps": [
+        "Navigate to farmer profile",
+        "Click 'Rate Farmer'",
+        "Select 5 stars",
+        "Submit"
+      ],
+      "expected_result": "Rating saved, farmer's average updated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-5",
+      "type": "positive",
+      "title": "Reviews displayed on product page",
+      "preconditions": ["Product has multiple reviews"],
+      "steps": [
+        "Navigate to product page"
+      ],
+      "expected_result": "Average rating and reviews list displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-6",
+      "type": "positive",
+      "title": "Farmer responds to review",
+      "preconditions": ["Farmer has received a review"],
+      "steps": [
+        "Farmer views review",
+        "Clicks 'Respond'",
+        "Types response",
+        "Submits"
+      ],
+      "expected_result": "Response displayed with original review",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-7",
+      "type": "positive",
+      "title": "Consumer edits their review",
+      "preconditions": ["Consumer has written a review"],
+      "steps": [
+        "Navigate to own review",
+        "Click 'Edit'",
+        "Update text",
+        "Save"
+      ],
+      "expected_result": "Review updated with 'edited' indicator",
+      "status": "pending"
+    },
+    {
+      "id": "TC-015-8",
+      "type": "positive",
+      "title": "Consumer deletes their review",
+      "preconditions": ["Consumer has written a review"],
+      "steps": [
+        "Navigate to own review",
+        "Click 'Delete'",
+        "Confirm deletion"
+      ],
+      "expected_result": "Review removed, product average recalculated",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

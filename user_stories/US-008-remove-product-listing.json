@@ -1,0 +1,169 @@
+{
+  "id": "US-008",
+  "title": "Remove/Archive Product Listing",
+  "epic": "Product Listing Management",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a farmer, I want to remove or archive products from my listing so that I can manage discontinued items while maintaining historical data for reactivation.",
+  "user_role": "Farmer",
+  "business_value": "Allows farmers to maintain clean product catalogs while preserving the ability to bring back seasonal items.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-008-1",
+      "description": "Farmer can delete a product",
+      "given": "Farmer is viewing their product list",
+      "when": "Farmer clicks 'Delete' on a product and confirms",
+      "then": "Product is permanently removed from listing"
+    },
+    {
+      "id": "AC-008-2",
+      "description": "Confirmation is required before deletion",
+      "given": "Farmer clicks 'Delete' on a product",
+      "when": "Confirmation dialog appears",
+      "then": "Product is only deleted if farmer confirms"
+    },
+    {
+      "id": "AC-008-3",
+      "description": "Farmer can archive instead of delete",
+      "given": "Farmer is on product management",
+      "when": "Farmer clicks 'Archive' on a product",
+      "then": "Product is hidden from consumers but retained in system"
+    },
+    {
+      "id": "AC-008-4",
+      "description": "Archived products can be reactivated",
+      "given": "Farmer has archived products",
+      "when": "Farmer views archived products and clicks 'Reactivate'",
+      "then": "Product is restored to active listing"
+    },
+    {
+      "id": "AC-008-5",
+      "description": "Products with pending orders cannot be deleted",
+      "given": "Product has unfulfilled orders",
+      "when": "Farmer attempts to delete the product",
+      "then": "Error message indicates pending orders must be fulfilled first"
+    }
+  ],
+  "technical_notes": [
+    "Implement soft delete for archive functionality",
+    "Check for pending orders before allowing deletion",
+    "Maintain referential integrity with order history",
+    "Clear product from search index on archive/delete"
+  ],
+  "api_endpoints": [
+    {
+      "method": "DELETE",
+      "path": "/api/v1/farmers/products/{id}",
+      "description": "Permanently delete product"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/archive",
+      "description": "Archive product"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/reactivate",
+      "description": "Reactivate archived product"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/products?status=archived",
+      "description": "Get archived products"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-008-1",
+      "type": "positive",
+      "title": "Farmer successfully deletes a product",
+      "preconditions": ["Farmer has a product with no pending orders"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Delete' on a product",
+        "Confirm deletion in dialog"
+      ],
+      "expected_result": "Product is removed from list, confirmation shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-2",
+      "type": "positive",
+      "title": "Deletion cancelled when user declines confirmation",
+      "preconditions": ["Farmer has a product"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Delete' on a product",
+        "Click 'Cancel' in confirmation dialog"
+      ],
+      "expected_result": "Product is not deleted, remains in list",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-3",
+      "type": "negative",
+      "title": "Cannot delete product with pending orders",
+      "preconditions": ["Product has unfulfilled orders"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Delete' on product with pending orders"
+      ],
+      "expected_result": "Error message about pending orders is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-4",
+      "type": "positive",
+      "title": "Farmer successfully archives a product",
+      "preconditions": ["Farmer has an active product"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'Archive' on a product",
+        "Confirm action"
+      ],
+      "expected_result": "Product is moved to archived, not visible to consumers",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-5",
+      "type": "positive",
+      "title": "Farmer views archived products",
+      "preconditions": ["Farmer has archived products"],
+      "steps": [
+        "Navigate to 'My Products'",
+        "Click 'View Archived'"
+      ],
+      "expected_result": "List of archived products is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-6",
+      "type": "positive",
+      "title": "Farmer reactivates archived product",
+      "preconditions": ["Farmer has an archived product"],
+      "steps": [
+        "Navigate to archived products",
+        "Click 'Reactivate' on a product"
+      ],
+      "expected_result": "Product is moved to active list, visible to consumers",
+      "status": "pending"
+    },
+    {
+      "id": "TC-008-7",
+      "type": "integration",
+      "title": "Archived product not visible to consumers",
+      "preconditions": ["Farmer has archived a product"],
+      "steps": [
+        "Log in as consumer",
+        "Search for the archived product"
+      ],
+      "expected_result": "Product does not appear in search results",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

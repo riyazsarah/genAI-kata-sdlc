@@ -1,0 +1,206 @@
+{
+  "project": "Farm-to-Table Marketplace",
+  "version": "1.0",
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10",
+  "total_user_stories": 16,
+  "total_story_points": 101,
+  "iterations": {
+    "iteration_1": {
+      "name": "Foundation - User & Farmer Management",
+      "story_points": 31,
+      "user_stories": [
+        {
+          "id": "US-001",
+          "title": "User Registration",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-002",
+          "title": "User Login",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-003",
+          "title": "User Profile Management",
+          "priority": "Must Have",
+          "story_points": 8
+        },
+        {
+          "id": "US-004",
+          "title": "Farmer Registration",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-005",
+          "title": "Farmer Profile and Farm Setup",
+          "priority": "Must Have",
+          "story_points": 8
+        }
+      ]
+    },
+    "iteration_2": {
+      "name": "Product Management & Discovery",
+      "story_points": 41,
+      "user_stories": [
+        {
+          "id": "US-006",
+          "title": "Add Product Listing",
+          "priority": "Must Have",
+          "story_points": 8
+        },
+        {
+          "id": "US-007",
+          "title": "Update Product Listing",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-008",
+          "title": "Remove/Archive Product Listing",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-009",
+          "title": "Product Availability Management",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-010",
+          "title": "Product Pricing Management",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-011",
+          "title": "Product Catalog Browsing",
+          "priority": "Must Have",
+          "story_points": 5
+        },
+        {
+          "id": "US-012",
+          "title": "Product Search and Filtering",
+          "priority": "Must Have",
+          "story_points": 8
+        }
+      ]
+    },
+    "iteration_3": {
+      "name": "Checkout & Enhancements",
+      "story_points": 34,
+      "user_stories": [
+        {
+          "id": "US-013",
+          "title": "Shopping Cart Management",
+          "priority": "Must Have",
+          "story_points": 8
+        },
+        {
+          "id": "US-014",
+          "title": "Checkout Process",
+          "priority": "Must Have",
+          "story_points": 13
+        },
+        {
+          "id": "US-015",
+          "title": "Product and Farmer Reviews and Ratings",
+          "priority": "Nice to Have",
+          "story_points": 8
+        },
+        {
+          "id": "US-016",
+          "title": "Detailed Product Descriptions",
+          "priority": "Nice to Have",
+          "story_points": 5
+        }
+      ]
+    }
+  },
+  "epics": [
+    {
+      "name": "User Profile Management",
+      "user_stories": ["US-001", "US-002", "US-003"],
+      "story_points": 18
+    },
+    {
+      "name": "Farmer Profile Management",
+      "user_stories": ["US-004", "US-005"],
+      "story_points": 13
+    },
+    {
+      "name": "Product Listing Management",
+      "user_stories": ["US-006", "US-007", "US-008"],
+      "story_points": 18
+    },
+    {
+      "name": "Availability and Pricing Management",
+      "user_stories": ["US-009", "US-010"],
+      "story_points": 10
+    },
+    {
+      "name": "Product Browsing and Search",
+      "user_stories": ["US-011", "US-012"],
+      "story_points": 13
+    },
+    {
+      "name": "Shopping Cart and Checkout",
+      "user_stories": ["US-013", "US-014"],
+      "story_points": 21
+    },
+    {
+      "name": "Reviews and Ratings",
+      "user_stories": ["US-015"],
+      "story_points": 8
+    },
+    {
+      "name": "Product Information",
+      "user_stories": ["US-016"],
+      "story_points": 5
+    }
+  ],
+  "priority_summary": {
+    "must_have": {
+      "count": 14,
+      "story_points": 88
+    },
+    "nice_to_have": {
+      "count": 2,
+      "story_points": 13
+    }
+  },
+  "test_summary": {
+    "total_test_cases": 96,
+    "by_type": {
+      "positive": 58,
+      "negative": 18,
+      "edge": 4,
+      "security": 5,
+      "integration": 7,
+      "ui": 3,
+      "boundary": 1
+    }
+  },
+  "files": [
+    "US-001-user-registration.json",
+    "US-002-user-login.json",
+    "US-003-user-profile-management.json",
+    "US-004-farmer-registration.json",
+    "US-005-farmer-profile-setup.json",
+    "US-006-add-product-listing.json",
+    "US-007-update-product-listing.json",
+    "US-008-remove-product-listing.json",
+    "US-009-availability-management.json",
+    "US-010-pricing-management.json",
+    "US-011-product-browsing.json",
+    "US-012-product-search-filter.json",
+    "US-013-shopping-cart.json",
+    "US-014-checkout-process.json",
+    "US-015-reviews-ratings.json",
+    "US-016-detailed-product-descriptions.json"
+  ]
+}

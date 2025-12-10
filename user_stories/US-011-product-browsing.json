@@ -1,0 +1,182 @@
+{
+  "id": "US-011",
+  "title": "Product Catalog Browsing",
+  "epic": "Product Browsing and Search",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a consumer, I want to browse the product catalog with categorized listings so that I can discover available products from local farmers.",
+  "user_role": "Consumer",
+  "business_value": "Enables product discovery, which is the primary path to purchase, directly driving sales and user engagement.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-011-1",
+      "description": "Consumer can access product catalog from homepage",
+      "given": "Consumer is on the homepage",
+      "when": "Consumer clicks 'Browse Products' or 'Shop'",
+      "then": "Product catalog page is displayed"
+    },
+    {
+      "id": "AC-011-2",
+      "description": "Products are displayed in categorized listings",
+      "given": "Consumer is on product catalog",
+      "when": "Consumer views the page",
+      "then": "Products are organized by category (Vegetables, Fruits, Dairy, etc.)"
+    },
+    {
+      "id": "AC-011-3",
+      "description": "Product cards display key information",
+      "given": "Consumer is browsing products",
+      "when": "Consumer views product cards",
+      "then": "Each card shows image, name, price, farmer name, and availability"
+    },
+    {
+      "id": "AC-011-4",
+      "description": "Consumer can click product for details",
+      "given": "Consumer is browsing products",
+      "when": "Consumer clicks on a product card",
+      "then": "Product detail page is displayed"
+    },
+    {
+      "id": "AC-011-5",
+      "description": "Products show seasonal availability",
+      "given": "Consumer is browsing products",
+      "when": "Products are displayed",
+      "then": "Seasonal indicators (Spring, Summer, Fall, Winter) are visible"
+    },
+    {
+      "id": "AC-011-6",
+      "description": "Pagination or infinite scroll for large catalogs",
+      "given": "There are many products",
+      "when": "Consumer scrolls or clicks next",
+      "then": "Additional products are loaded"
+    }
+  ],
+  "technical_notes": [
+    "Implement lazy loading for product images",
+    "Use pagination (20 products per page) or infinite scroll",
+    "Cache product listings for performance",
+    "Support responsive design for mobile browsing"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/products",
+      "description": "Get paginated product list"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/{id}",
+      "description": "Get product details"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/categories",
+      "description": "Get all product categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/products/featured",
+      "description": "Get featured/seasonal products"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-011-1",
+      "type": "positive",
+      "title": "Consumer accesses product catalog",
+      "preconditions": ["Products exist in the system"],
+      "steps": [
+        "Navigate to homepage",
+        "Click 'Browse Products'"
+      ],
+      "expected_result": "Product catalog page is displayed with products",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-2",
+      "type": "positive",
+      "title": "Products are displayed by category",
+      "preconditions": ["Products exist in multiple categories"],
+      "steps": [
+        "Navigate to product catalog"
+      ],
+      "expected_result": "Products are grouped/filterable by category",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-3",
+      "type": "positive",
+      "title": "Product card displays correct information",
+      "preconditions": ["Products exist"],
+      "steps": [
+        "Navigate to product catalog",
+        "View a product card"
+      ],
+      "expected_result": "Card shows image, name, price, farmer, availability",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-4",
+      "type": "positive",
+      "title": "Consumer views product details",
+      "preconditions": ["Products exist"],
+      "steps": [
+        "Navigate to product catalog",
+        "Click on a product"
+      ],
+      "expected_result": "Product detail page opens with full information",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-5",
+      "type": "positive",
+      "title": "Seasonal products are indicated",
+      "preconditions": ["Seasonal products exist"],
+      "steps": [
+        "Navigate to product catalog"
+      ],
+      "expected_result": "Products show seasonal badges/indicators",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-6",
+      "type": "positive",
+      "title": "Pagination works correctly",
+      "preconditions": ["More than 20 products exist"],
+      "steps": [
+        "Navigate to product catalog",
+        "Scroll to bottom or click 'Next Page'"
+      ],
+      "expected_result": "Additional products are loaded",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-7",
+      "type": "ui",
+      "title": "Product images load lazily",
+      "preconditions": ["Many products exist"],
+      "steps": [
+        "Navigate to product catalog",
+        "Observe network requests"
+      ],
+      "expected_result": "Images load as they enter viewport",
+      "status": "pending"
+    },
+    {
+      "id": "TC-011-8",
+      "type": "edge",
+      "title": "Empty catalog message",
+      "preconditions": ["No products exist or all are out of stock"],
+      "steps": [
+        "Navigate to product catalog"
+      ],
+      "expected_result": "Friendly message 'No products available' is displayed",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

@@ -1,0 +1,185 @@
+{
+  "id": "US-009",
+  "title": "Product Availability Management",
+  "epic": "Availability and Pricing Management",
+  "priority": "Must Have",
+  "iteration": 2,
+  "status": "pending",
+  "description": "As a farmer, I want to manage product availability and inventory levels so that consumers can see accurate stock information and I can prevent overselling.",
+  "user_role": "Farmer",
+  "business_value": "Prevents overselling, maintains consumer trust, and helps farmers manage inventory efficiently.",
+  "dependencies": ["US-006"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-009-1",
+      "description": "Farmer can update product quantity",
+      "given": "Farmer is on product management",
+      "when": "Farmer updates quantity for a product",
+      "then": "New quantity is saved and reflected"
+    },
+    {
+      "id": "AC-009-2",
+      "description": "Farmer can mark product as out-of-stock",
+      "given": "Farmer is on product management",
+      "when": "Farmer sets quantity to 0 or marks as out-of-stock",
+      "then": "Product is displayed as out-of-stock to consumers"
+    },
+    {
+      "id": "AC-009-3",
+      "description": "Low stock alerts are triggered",
+      "given": "Product quantity falls below threshold",
+      "when": "Stock level is low",
+      "then": "Farmer receives low-stock notification"
+    },
+    {
+      "id": "AC-009-4",
+      "description": "Visual indicators for stock levels",
+      "given": "Farmer is viewing product dashboard",
+      "when": "Products have varying stock levels",
+      "then": "Visual indicators show low stock (yellow) and out-of-stock (red)"
+    },
+    {
+      "id": "AC-009-5",
+      "description": "Inventory is automatically decremented on orders",
+      "given": "Product has available stock",
+      "when": "Consumer places an order",
+      "then": "Product quantity is reduced by ordered amount"
+    },
+    {
+      "id": "AC-009-6",
+      "description": "Farmer can set low-stock threshold",
+      "given": "Farmer is on product settings",
+      "when": "Farmer sets custom threshold (e.g., 10 units)",
+      "then": "Alerts trigger when stock falls below threshold"
+    }
+  ],
+  "technical_notes": [
+    "Implement real-time inventory tracking",
+    "Use database transactions for inventory updates to prevent race conditions",
+    "Send notifications via email/push based on farmer preferences",
+    "Default low-stock threshold: 10 units (configurable per product)"
+  ],
+  "api_endpoints": [
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/inventory",
+      "description": "Update product quantity"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/availability",
+      "description": "Mark product as in-stock or out-of-stock"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/farmers/products/{id}/threshold",
+      "description": "Set low-stock threshold"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/farmers/products/low-stock",
+      "description": "Get products with low stock"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-009-1",
+      "type": "positive",
+      "title": "Farmer updates product quantity",
+      "preconditions": ["Farmer has a product with quantity 50"],
+      "steps": [
+        "Navigate to product inventory",
+        "Change quantity to 75",
+        "Save changes"
+      ],
+      "expected_result": "Quantity is updated to 75",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-2",
+      "type": "positive",
+      "title": "Product marked as out-of-stock",
+      "preconditions": ["Farmer has an active product"],
+      "steps": [
+        "Navigate to product inventory",
+        "Set quantity to 0",
+        "Save changes"
+      ],
+      "expected_result": "Product shows as out-of-stock",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-3",
+      "type": "positive",
+      "title": "Low stock alert is triggered",
+      "preconditions": ["Product has threshold of 10, current quantity 15"],
+      "steps": [
+        "Simulate order that reduces quantity to 8"
+      ],
+      "expected_result": "Farmer receives low-stock notification",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-4",
+      "type": "integration",
+      "title": "Inventory decrements on order placement",
+      "preconditions": ["Product has quantity 50"],
+      "steps": [
+        "Consumer places order for 5 units",
+        "Order is confirmed"
+      ],
+      "expected_result": "Product quantity is now 45",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-5",
+      "type": "positive",
+      "title": "Farmer sets custom low-stock threshold",
+      "preconditions": ["Product exists"],
+      "steps": [
+        "Navigate to product settings",
+        "Set threshold to 20",
+        "Save changes"
+      ],
+      "expected_result": "Threshold is saved, alerts trigger at 20 units",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-6",
+      "type": "ui",
+      "title": "Low stock visual indicator displayed",
+      "preconditions": ["Product quantity is below threshold"],
+      "steps": [
+        "Navigate to product dashboard"
+      ],
+      "expected_result": "Product shows yellow low-stock indicator",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-7",
+      "type": "ui",
+      "title": "Out-of-stock visual indicator displayed",
+      "preconditions": ["Product quantity is 0"],
+      "steps": [
+        "Navigate to product dashboard"
+      ],
+      "expected_result": "Product shows red out-of-stock indicator",
+      "status": "pending"
+    },
+    {
+      "id": "TC-009-8",
+      "type": "negative",
+      "title": "Consumer cannot order out-of-stock product",
+      "preconditions": ["Product is out of stock"],
+      "steps": [
+        "Consumer views product",
+        "Attempts to add to cart"
+      ],
+      "expected_result": "Add to cart is disabled, out-of-stock message shown",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

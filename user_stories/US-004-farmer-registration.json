@@ -1,0 +1,128 @@
+{
+  "id": "US-004",
+  "title": "Farmer Registration",
+  "epic": "Farmer Profile Management",
+  "priority": "Must Have",
+  "iteration": 1,
+  "status": "pending",
+  "description": "As a farmer, I want to register on the Farm-to-Table Marketplace so that I can sell my products directly to consumers and manage my farm's online presence.",
+  "user_role": "Farmer",
+  "business_value": "Enables farmers to join the platform and directly access consumers, forming the supply side of the marketplace.",
+  "dependencies": [],
+  "acceptance_criteria": [
+    {
+      "id": "AC-004-1",
+      "description": "Farmer can access registration page",
+      "given": "Farmer is on the homepage",
+      "when": "Farmer clicks 'Join as Farmer' button",
+      "then": "Farmer is redirected to the farmer registration form"
+    },
+    {
+      "id": "AC-004-2",
+      "description": "Farmer can register with basic information",
+      "given": "Farmer is on the registration page",
+      "when": "Farmer enters full name, email, password, phone, and date of birth",
+      "then": "Account is created and verification email is sent"
+    },
+    {
+      "id": "AC-004-3",
+      "description": "Email validation is enforced",
+      "given": "Farmer is on the registration page",
+      "when": "Farmer enters an invalid email format",
+      "then": "Error message 'Please enter a valid email address' is displayed"
+    },
+    {
+      "id": "AC-004-4",
+      "description": "Duplicate email prevention",
+      "given": "Farmer is on the registration page",
+      "when": "Farmer enters an email that already exists",
+      "then": "Error message 'An account with this email already exists' is displayed"
+    },
+    {
+      "id": "AC-004-5",
+      "description": "Email verification is required",
+      "given": "Farmer has submitted registration",
+      "when": "Farmer clicks verification link in email",
+      "then": "Account is verified and farmer can complete profile setup"
+    }
+  ],
+  "technical_notes": [
+    "Farmer accounts should have a different role from consumer accounts",
+    "Use secure password hashing (bcrypt)",
+    "Implement rate limiting on registration endpoint",
+    "Farmer accounts may require additional verification (optional future enhancement)"
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/farmer/register",
+      "description": "Register a new farmer account"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/verify-email",
+      "description": "Verify farmer email with token"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-004-1",
+      "type": "positive",
+      "title": "Successful farmer registration",
+      "preconditions": ["Registration page is accessible", "Email is not registered"],
+      "steps": [
+        "Navigate to farmer registration page",
+        "Enter full name: 'John Farmer'",
+        "Enter email: 'john.farmer@farm.com'",
+        "Enter password: 'FarmSecure123!'",
+        "Enter phone: '+1234567890'",
+        "Enter date of birth: '1985-05-15'",
+        "Click 'Register' button"
+      ],
+      "expected_result": "Farmer account is created, verification email is sent",
+      "status": "pending"
+    },
+    {
+      "id": "TC-004-2",
+      "type": "negative",
+      "title": "Registration fails with invalid email",
+      "preconditions": ["Registration page is accessible"],
+      "steps": [
+        "Navigate to farmer registration page",
+        "Enter invalid email format",
+        "Attempt to submit"
+      ],
+      "expected_result": "Validation error for email is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-004-3",
+      "type": "negative",
+      "title": "Registration fails with duplicate email",
+      "preconditions": ["Email already registered"],
+      "steps": [
+        "Navigate to farmer registration page",
+        "Enter existing email",
+        "Fill other fields",
+        "Click 'Register'"
+      ],
+      "expected_result": "Error message about duplicate email is displayed",
+      "status": "pending"
+    },
+    {
+      "id": "TC-004-4",
+      "type": "positive",
+      "title": "Email verification works",
+      "preconditions": ["Farmer has registered but not verified"],
+      "steps": [
+        "Open verification email",
+        "Click verification link"
+      ],
+      "expected_result": "Account is verified, redirected to profile setup",
+      "status": "pending"
+    }
+  ],
+  "story_points": 5,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}

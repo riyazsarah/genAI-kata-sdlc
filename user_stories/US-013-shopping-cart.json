@@ -1,0 +1,236 @@
+{
+  "id": "US-013",
+  "title": "Shopping Cart Management",
+  "epic": "Shopping Cart and Checkout",
+  "priority": "Must Have",
+  "iteration": 3,
+  "status": "pending",
+  "description": "As a consumer, I want to add products to a shopping cart, edit quantities, and remove items so that I can prepare my order before checkout.",
+  "user_role": "Consumer",
+  "business_value": "Core e-commerce functionality that enables purchase flow and increases order value through easy management of multiple items.",
+  "dependencies": ["US-011"],
+  "acceptance_criteria": [
+    {
+      "id": "AC-013-1",
+      "description": "Consumer can add product to cart",
+      "given": "Consumer is viewing a product",
+      "when": "Consumer clicks 'Add to Cart'",
+      "then": "Product is added to cart and cart icon updates"
+    },
+    {
+      "id": "AC-013-2",
+      "description": "Consumer can specify quantity when adding",
+      "given": "Consumer is adding a product",
+      "when": "Consumer selects quantity (e.g., 3 lbs)",
+      "then": "Selected quantity is added to cart"
+    },
+    {
+      "id": "AC-013-3",
+      "description": "Consumer can view cart",
+      "given": "Consumer has items in cart",
+      "when": "Consumer clicks cart icon",
+      "then": "Cart page shows all items with details"
+    },
+    {
+      "id": "AC-013-4",
+      "description": "Consumer can update item quantity in cart",
+      "given": "Consumer is viewing cart",
+      "when": "Consumer changes quantity of an item",
+      "then": "Quantity and subtotal are updated"
+    },
+    {
+      "id": "AC-013-5",
+      "description": "Consumer can remove item from cart",
+      "given": "Consumer is viewing cart",
+      "when": "Consumer clicks 'Remove' on an item",
+      "then": "Item is removed from cart"
+    },
+    {
+      "id": "AC-013-6",
+      "description": "Cart displays order summary",
+      "given": "Consumer is viewing cart",
+      "when": "Cart has items",
+      "then": "Subtotal, estimated tax, and total are displayed"
+    },
+    {
+      "id": "AC-013-7",
+      "description": "Cart persists across sessions",
+      "given": "Consumer has items in cart and logs out",
+      "when": "Consumer logs back in",
+      "then": "Cart items are preserved"
+    },
+    {
+      "id": "AC-013-8",
+      "description": "Out-of-stock items cannot be added",
+      "given": "Product is out of stock",
+      "when": "Consumer tries to add to cart",
+      "then": "'Add to Cart' is disabled with out-of-stock message"
+    },
+    {
+      "id": "AC-013-9",
+      "description": "Quantity cannot exceed available stock",
+      "given": "Product has limited stock",
+      "when": "Consumer tries to add more than available",
+      "then": "Error message about max quantity is displayed"
+    }
+  ],
+  "technical_notes": [
+    "Use database or Redis for cart persistence for logged-in users",
+    "Use localStorage for guest cart (merge on login)",
+    "Validate stock availability on cart operations",
+    "Calculate taxes based on delivery address",
+    "Cart should handle products from multiple farmers"
+  ],
+  "api_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/cart",
+      "description": "Get current user's cart"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cart/items",
+      "description": "Add item to cart"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/cart/items/{id}",
+      "description": "Update cart item quantity"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/cart/items/{id}",
+      "description": "Remove item from cart"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/cart",
+      "description": "Clear entire cart"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-013-1",
+      "type": "positive",
+      "title": "Add product to cart",
+      "preconditions": ["Product is in stock", "Cart is empty"],
+      "steps": [
+        "Navigate to product page",
+        "Click 'Add to Cart'"
+      ],
+      "expected_result": "Product added, cart icon shows 1 item",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-2",
+      "type": "positive",
+      "title": "Add product with specific quantity",
+      "preconditions": ["Product is in stock"],
+      "steps": [
+        "Navigate to product page",
+        "Select quantity: 3",
+        "Click 'Add to Cart'"
+      ],
+      "expected_result": "3 units added to cart",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-3",
+      "type": "positive",
+      "title": "View cart with items",
+      "preconditions": ["Cart has 2 different products"],
+      "steps": [
+        "Click cart icon"
+      ],
+      "expected_result": "Both products shown with details, subtotal calculated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-4",
+      "type": "positive",
+      "title": "Update item quantity in cart",
+      "preconditions": ["Cart has product with quantity 2"],
+      "steps": [
+        "View cart",
+        "Change quantity to 5",
+        "Confirm change"
+      ],
+      "expected_result": "Quantity updated to 5, subtotal recalculated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-5",
+      "type": "positive",
+      "title": "Remove item from cart",
+      "preconditions": ["Cart has 2 items"],
+      "steps": [
+        "View cart",
+        "Click 'Remove' on first item"
+      ],
+      "expected_result": "Item removed, 1 item remains in cart",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-6",
+      "type": "positive",
+      "title": "Cart shows correct totals",
+      "preconditions": ["Cart has items totaling $25"],
+      "steps": [
+        "View cart"
+      ],
+      "expected_result": "Subtotal: $25, Tax: calculated, Total: calculated",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-7",
+      "type": "positive",
+      "title": "Cart persists after logout/login",
+      "preconditions": ["User is logged in with items in cart"],
+      "steps": [
+        "Log out",
+        "Log back in",
+        "View cart"
+      ],
+      "expected_result": "Cart items are preserved",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-8",
+      "type": "negative",
+      "title": "Cannot add out-of-stock product",
+      "preconditions": ["Product is out of stock"],
+      "steps": [
+        "Navigate to out-of-stock product",
+        "Attempt to click 'Add to Cart'"
+      ],
+      "expected_result": "Button is disabled, 'Out of Stock' message shown",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-9",
+      "type": "negative",
+      "title": "Cannot exceed available stock",
+      "preconditions": ["Product has 5 units in stock"],
+      "steps": [
+        "Navigate to product",
+        "Attempt to add 10 units"
+      ],
+      "expected_result": "Error message about max available quantity",
+      "status": "pending"
+    },
+    {
+      "id": "TC-013-10",
+      "type": "edge",
+      "title": "Empty cart message",
+      "preconditions": ["Cart is empty"],
+      "steps": [
+        "View cart"
+      ],
+      "expected_result": "'Your cart is empty' with link to browse products",
+      "status": "pending"
+    }
+  ],
+  "story_points": 8,
+  "created_date": "2025-12-10",
+  "last_updated": "2025-12-10"
+}
